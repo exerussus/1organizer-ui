@@ -73,7 +73,35 @@ namespace Exerussus._1OrganizerUI.Scripts
                 enabledModules.Remove(uiModule.Name);
             }
         }
-
+        
+        public void UnloadModule(string uiName)
+        {
+            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            {
+                if (enabledModules.Contains(uiModule.Name))
+                {
+                    uiModule.Hide();
+                    enabledModules.Remove(uiModule.Name);
+                    _disabledModules.Add(uiModule.Name);
+                }
+                uiModule.Unload();
+            }
+        }
+        
+        public void UnloadGroup(string groupName)
+        {
+            if (_groupsDict.TryGetValue(groupName, out var group)) foreach (var uiModule in group)
+            {
+                if (enabledModules.Contains(uiModule.Name))
+                {
+                    uiModule.Hide();
+                    enabledModules.Remove(uiModule.Name);
+                    _disabledModules.Add(uiModule.Name);
+                }
+                uiModule.Unload();
+            }
+        }
+        
         public void UpdateModule(string uiName)
         {
             if (_modulesDict.TryGetValue(uiName, out var uiModule)) uiModule.UpdateModule();
