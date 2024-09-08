@@ -13,8 +13,8 @@ namespace Exerussus._1OrganizerUI.Scripts
         [SerializeField] private List<string> enabledModules = new();
         private List<string> _disabledModules = new();
         
-        private Dictionary<string, UiModule> _modulesDict;
-        private Dictionary<string, List<UiModule>> _groupsDict;
+        private Dictionary<string, TModule> _modulesDict;
+        private Dictionary<string, List<TModule>> _groupsDict;
         
         public void Start()
         {
@@ -33,7 +33,7 @@ namespace Exerussus._1OrganizerUI.Scripts
                 _modulesDict[uiModule.Name] = uiModule;
                 
                 if (_groupsDict.ContainsKey(uiModule.Group)) _groupsDict[uiModule.Group].Add(uiModule);
-                else _groupsDict.Add(uiModule.Group, new List<UiModule> { uiModule });
+                else _groupsDict.Add(uiModule.Group, new List<TModule> { uiModule });
                 
                 if (enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, transform);
                 else _disabledModules.Add(uiModule.Name);
@@ -63,6 +63,23 @@ namespace Exerussus._1OrganizerUI.Scripts
             }
         }
 
+        public TModule GetModule(string uiName)
+        {
+            return _modulesDict[uiName];
+        }
+
+        public bool TryGetModule(string uiName, out TModule module)
+        {
+            if (_modulesDict.TryGetValue(uiName, out TModule resultModule))
+            {
+                module = resultModule;
+                return true;
+            }
+
+            module = null;
+            return false;
+        }
+        
         public void HideGroup(string groupName)
         {
             if (_groupsDict.TryGetValue(groupName, out var group)) foreach (var uiModule in group)
