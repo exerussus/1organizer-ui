@@ -25,6 +25,7 @@ namespace Exerussus._1OrganizerUI.Scripts
         {
             shareData = new ShareData();
             _modulesDict = new();
+            _groupsDict = new();
             SetShareData(shareData);
             
             foreach (var uiModule in modules)
