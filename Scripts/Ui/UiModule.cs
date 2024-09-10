@@ -5,7 +5,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
-namespace Exerussus._1OrganizerUI.Scripts
+namespace Plugins.Exerussus._1OrganizerUI.Scripts.Ui
 {
     [Serializable]
     public abstract class UiModule

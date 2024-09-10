@@ -1,8 +1,8 @@
-
 using System.Collections.Generic;
+using Plugins.Exerussus._1OrganizerUI.Scripts.Ui;
 using UnityEngine;
 
-namespace Exerussus._1OrganizerUI.Scripts
+namespace Plugins.Exerussus._1OrganizerUI.Scripts
 {
     public abstract class OrganizerUI<TModule> : MonoBehaviour
     where TModule : UiModule
