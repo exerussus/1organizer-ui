@@ -1,4 +1,4 @@
-﻿namespace Plugins.Exerussus._1OrganizerUI.Scripts.Ui
+﻿namespace Exerussus._1OrganizerUI.Scripts.Ui
 {
     public interface IObjectUI
     {

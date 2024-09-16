@@ -1,4 +1,4 @@
-using System;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -6,7 +6,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
-namespace Plugins.Exerussus._1OrganizerUI.Scripts
+namespace Exerussus._1OrganizerUI.Scripts.Pooling
 {
     public class AddressablePoolObject<T> where T : MonoBehaviour
     {

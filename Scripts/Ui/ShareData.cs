@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 
-namespace Plugins.Exerussus._1OrganizerUI.Scripts.Ui
+namespace Exerussus._1OrganizerUI.Scripts.Ui
 {
     [Serializable]
     public class ShareData
