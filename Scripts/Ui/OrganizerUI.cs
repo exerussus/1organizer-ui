@@ -10,11 +10,18 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         [SerializeField] private ShareData shareData;
         [SerializeField] private List<TModule> modules = new();
         [SerializeField] private List<string> enabledModules = new();
+        [SerializeField] private Transform _parentTransform;
         private List<string> _disabledModules = new();
         
         private Dictionary<string, TModule> _modulesDict;
         private Dictionary<string, List<TModule>> _groupsDict;
-        
+
+        public Transform ParentTransform
+        {
+            get => _parentTransform;
+            set => _parentTransform = value;
+        }
+
         public void Start()
         {
             if (autoStart) Initialize();
@@ -41,7 +48,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             foreach (var uiModule in modules)
             {
-                if (enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, transform);
+                if (enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, _parentTransform);
                 else _disabledModules.Add(uiModule.Name);
             }
         }
@@ -58,7 +65,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 
                 enabledModules.Add(uiName);
                 _disabledModules.Remove(uiName);
-                uiModule.Show(shareData, transform);
+                uiModule.Show(shareData, _parentTransform);
             }
         }
 
@@ -146,7 +153,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 enabledModules.Add(uiModule.Name);
                 _disabledModules.Remove(uiModule.Name);
-                uiModule.Show(shareData, transform);
+                uiModule.Show(shareData, _parentTransform);
             }
         }
 
