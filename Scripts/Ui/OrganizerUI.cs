@@ -7,6 +7,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
     where TModule : UiModule
     {
         [SerializeField] private bool autoStart;
+        [SerializeField] private bool dontDestroyOnLoad;
         [SerializeField] private ShareData shareData;
         [SerializeField] private List<TModule> modules = new();
         [SerializeField] private List<string> enabledModules = new();
@@ -29,6 +30,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         public void Initialize()
         {
+            if (dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
             shareData = new ShareData();
             _modulesDict = new();
             _groupsDict = new();
