@@ -24,7 +24,6 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             IsActivated = false;
             if (UIObject == null) return;
             UIObject.Deactivate();
-            if (UIObject is MonoBehaviour monoBeh) monoBeh.gameObject.SetActive(false);
         }
         
         public virtual void Show(ShareData shareData, Transform transform)
@@ -34,7 +33,6 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             if (UIObject != null)
             {
                 IsActivated = true;
-                if (UIObject is MonoBehaviour monoBeh) monoBeh.gameObject.SetActive(true);
                 UIObject.Activate();
             }
         }
@@ -54,7 +52,6 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            if (_loadedInstance == null) return;
            UIObject = _loadedInstance.GetComponent<IObjectUI>();
            UIObject.Initialize(shareData);
-           if (UIObject is MonoBehaviour monoBeh) monoBeh.gameObject.SetActive(true);
            UIObject.Activate();
         }
 
