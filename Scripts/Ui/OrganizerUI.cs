@@ -37,6 +37,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 if (enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, transform);
                 else _disabledModules.Add(uiModule.Name);
             }
+
+            OnInitialize();
         }
 
         public void ShowModule(string uiName)
@@ -143,6 +145,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
+        protected abstract void OnInitialize();
         protected abstract void SetShareData(ShareData shareData);
     }
 }
