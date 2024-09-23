@@ -27,18 +27,23 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             _groupsDict = new();
             SetShareData(shareData);
             
+            PreInitialize();
+            
             foreach (var uiModule in modules)
             {
                 _modulesDict[uiModule.Name] = uiModule;
                 
                 if (_groupsDict.ContainsKey(uiModule.Group)) _groupsDict[uiModule.Group].Add(uiModule);
                 else _groupsDict.Add(uiModule.Group, new List<TModule> { uiModule });
-                
-                if (enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, transform);
-                else _disabledModules.Add(uiModule.Name);
             }
 
             OnInitialize();
+            
+            foreach (var uiModule in modules)
+            {
+                if (enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, transform);
+                else _disabledModules.Add(uiModule.Name);
+            }
         }
 
         public void ShowModule(string uiName)
@@ -145,7 +150,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
-        protected abstract void OnInitialize();
+        protected virtual void PreInitialize() {}
+        protected virtual void OnInitialize() {}
         protected abstract void SetShareData(ShareData shareData);
     }
 }
