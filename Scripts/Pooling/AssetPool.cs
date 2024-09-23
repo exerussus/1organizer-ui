@@ -17,7 +17,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
         }
 
         public void GetAndExecute(string name, string path, Action<T> action) => GetAndExecuteAsync(name, path, action);
-        public void GetAndExecute(string name, string path, Vector3 position, Action<T> action) => GetAndExecuteAsync(name, path, position, action);
+        public void GetAndExecute(string name, string path, Vector3 position, Action<T> action)
+        {
+            if (name == null) Debug.LogError("Asset name is null 2");
+            GetAndExecuteAsync(name, path, position, action);
+        }
         public void GetAndExecute(string name, string path, Vector3 position, Quaternion quaternion, Action<T> action) => GetAndExecuteAsync(name, path, position, quaternion, action);
         
         private async void GetAndExecuteAsync(string name, string path, Action<T> action)
@@ -28,6 +32,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
         
         private async void GetAndExecuteAsync(string name, string path, Vector3 position, Action<T> action)
         {
+            if (name == null) Debug.LogError("Asset name is null 3");
             var pool = await TryInitializePool(name, path);
             action(pool.GetObject(position, Quaternion.identity));
         }
