@@ -52,6 +52,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            if (_loadedInstance == null) return;
            UIObject = _loadedInstance.GetComponent<IObjectUI>();
            UIObject.Initialize(shareData);
+           UIObject.Activate();
         }
 
         public virtual void Unload()
