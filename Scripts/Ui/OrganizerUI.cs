@@ -12,8 +12,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         [SerializeField] private List<TModule> modules = new();
         [SerializeField] private List<string> enabledModules = new();
         [SerializeField] private Transform _parentTransform;
-        private List<string> _disabledModules = new();
         
+        private List<string> _disabledModules = new();
         private Dictionary<string, TModule> _modulesDict;
         private Dictionary<string, List<TModule>> _groupsDict;
 
