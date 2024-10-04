@@ -17,6 +17,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         private Transform _parent;
         private GameObject _loadedInstance;
         private AsyncOperationHandle<GameObject> _handle;
+        private bool _isLoading;
+        
         public bool IsActivated { get; private set; }
 
         public virtual void Hide()
@@ -44,7 +46,10 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         public virtual async void Load(ShareData shareData, Transform transform)
         {
+            if (_isLoading) return;
+            
            _parent = transform;
+           _isLoading = true;
            var loadResult = await LoadAndInstantiateAsync(ResourcePath, _parent);
            _loadedInstance = loadResult.instance;
            _handle = loadResult.handle;
@@ -53,6 +58,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            UIObject = _loadedInstance.GetComponent<IObjectUI>();
            UIObject.Initialize(shareData);
            UIObject.Activate();
+           _isLoading = false;
         }
 
         public virtual void Unload()
