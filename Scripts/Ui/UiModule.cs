@@ -23,13 +23,16 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         public virtual void Hide()
         {
-            IsActivated = false;
             if (UIObject == null) return;
+            if (!IsActivated) return; 
+            IsActivated = false;
             UIObject.Deactivate();
         }
         
         public virtual void Show(ShareData shareData, Transform transform)
         {
+            if (IsActivated) UIObject.UpdateObject();
+            
             if (UIObject == null) Load(shareData, transform);
             
             if (UIObject != null)
@@ -58,12 +61,14 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            UIObject = _loadedInstance.GetComponent<IObjectUI>();
            UIObject.Initialize(shareData);
            UIObject.Activate();
+           IsActivated = true;
            _isLoading = false;
         }
 
         public virtual void Unload()
         {
             UIObject = null;
+            IsActivated = false;
             
             if (_loadedInstance != null)
             {

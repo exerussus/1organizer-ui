@@ -54,6 +54,24 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 else _disabledModules.Add(uiModule.Name);
             }
         }
+        
+        private void MoveToEnabledList(string uiName)
+        {
+            if (_disabledModules.Contains(uiName))
+            {
+                _disabledModules.Remove(uiName);
+                enabledModules.Add(uiName);
+            }
+        }
+
+        private void MoveToDisabledList(string uiName)
+        {
+            if (enabledModules.Contains(uiName))
+            {
+                enabledModules.Remove(uiName);
+                _disabledModules.Add(uiName);
+            }
+        }
 
         public void ShowModule(string uiName)
         {
@@ -65,8 +83,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                     return;
                 }
                 
-                enabledModules.Add(uiName);
-                _disabledModules.Remove(uiName);
+                MoveToEnabledList(uiModule.Name);
                 uiModule.Show(shareData, _parentTransform);
             }
         }
@@ -76,8 +93,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             if (_disabledModules.Contains(uiName)) return;
             if (_modulesDict.TryGetValue(uiName, out var uiModule))
             {
-                _disabledModules.Add(uiName);
-                enabledModules.Remove(uiName);
+                MoveToDisabledList(uiModule.Name);
                 uiModule.Hide();
             }
         }
@@ -98,15 +114,16 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             module = null;
             return false;
         }
-        
+
         public void HideGroup(string groupName)
         {
-            if (_groupsDict.TryGetValue(groupName, out var group)) foreach (var uiModule in group)
+            if (!_groupsDict.TryGetValue(groupName, out var group)) return;
+            
+            foreach (var uiModule in group)
             {
                 if (_disabledModules.Contains(uiModule.Name)) continue;
-                
-                _disabledModules.Add(uiModule.Name);
-                enabledModules.Remove(uiModule.Name);
+
+                MoveToDisabledList(uiModule.Name);
                 uiModule.Hide();
             }
         }
@@ -117,8 +134,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 if (enabledModules.Contains(uiModule.Name))
                 {
-                    enabledModules.Remove(uiModule.Name);
-                    _disabledModules.Add(uiModule.Name);
+                    MoveToDisabledList(uiModule.Name);
                     uiModule.Hide();
                 }
                 uiModule.Unload();
@@ -131,8 +147,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 if (enabledModules.Contains(uiModule.Name))
                 {
-                    enabledModules.Remove(uiModule.Name);
-                    _disabledModules.Add(uiModule.Name);
+                    MoveToDisabledList(uiModule.Name);
                     uiModule.Hide();
                 }
                 uiModule.Unload();
@@ -153,8 +168,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         {
             if(_groupsDict.TryGetValue(groupName, out var group)) foreach (var uiModule in group)
             {
-                enabledModules.Add(uiModule.Name);
-                _disabledModules.Remove(uiModule.Name);
+                MoveToEnabledList(uiModule.Name);
                 uiModule.Show(shareData, _parentTransform);
             }
         }
