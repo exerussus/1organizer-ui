@@ -66,6 +66,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
         
         private static async Task<(GameObject instance, AsyncOperationHandle<GameObject> handle)> LoadAndInstantiateAsync(string address, Transform parentTransform)
         {
+            Debug.Log(address);
             if (string.IsNullOrEmpty(address))
             {
                 Debug.LogError("Address is null or empty.");
