@@ -13,14 +13,18 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         public abstract string Name { get; protected set; }
         public abstract string ResourcePath { get; protected set; }
         public abstract string Group { get; protected set; }
+        public abstract int Order { get; protected set; }
         public IObjectUI UIObject { get; private set; }
         private Transform _parent;
         private GameObject _loadedInstance;
+        private ShareData _mSharedData;
+        public GameObject LoadedInstance => _loadedInstance;
+
         private AsyncOperationHandle<GameObject> _handle;
         private bool _isLoading;
         
         public bool IsActivated { get; private set; }
-
+        
         public virtual void Hide()
         {
             if (UIObject == null) return;
@@ -50,7 +54,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         public virtual async void Load(ShareData shareData, Transform transform)
         {
             if (_isLoading) return;
-            
+            _mSharedData = shareData;
            _parent = transform;
            _isLoading = true;
            var loadResult = await LoadAndInstantiateAsync(ResourcePath, _parent);
@@ -61,6 +65,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            UIObject = _loadedInstance.GetComponent<IObjectUI>();
            UIObject.Initialize(shareData);
            UIObject.Activate();
+           _mSharedData.GetObject<OrganizerActions>().Sorting.Invoke();
            IsActivated = true;
            _isLoading = false;
         }

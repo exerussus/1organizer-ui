@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.Ui
@@ -36,6 +38,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             _groupsDict = new();
             SetShareData(shareData);
             
+            shareData.AddObject(new OrganizerActions{ Sorting = Sort});
+            
             PreInitialize();
             
             foreach (var uiModule in modules)
@@ -52,6 +56,19 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 if (enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, _parentTransform);
                 else _disabledModules.Add(uiModule.Name);
+            }
+        }
+        
+        private void Sort()
+        {
+            var sortedModules = modules
+                .Where(m => m.LoadedInstance != null) 
+                .OrderBy(m => m.Order)                 
+                .ToList();
+            
+            for (int i = 0; i < sortedModules.Count; i++)
+            {
+                sortedModules[i].LoadedInstance.transform.SetSiblingIndex(i);
             }
         }
         
@@ -176,5 +193,10 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         protected virtual void PreInitialize() {}
         protected virtual void OnInitialize() {}
         protected abstract void SetShareData(ShareData shareData);
+
+    }
+    public class OrganizerActions
+    {
+        public Action Sorting;
     }
 }
