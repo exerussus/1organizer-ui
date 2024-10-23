@@ -43,6 +43,30 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
                 _freeObjects.Enqueue(element);
             }
         }
+        
+        public async Task InitPrefab(string name, AssetReference assetReference, bool dontDestroyOnLoad, int count = DefaultObjectCount)
+        {
+            _parent = new GameObject { name = $"{name} pool" }.transform;
+            
+            if (dontDestroyOnLoad) Object.DontDestroyOnLoad(_parent);
+            
+            var loadResult = await LoadAndInstantiateAsync(assetReference, _parent);
+            
+            IsReady = true;
+            _prefab = loadResult.instance.GetComponent<T>();
+            _handle = loadResult.handle;
+            
+            _prefab.gameObject.SetActive(false);
+            _prefab.name = $"{name} prefab";
+            _elementName = $"{name} element";
+            
+            for (int i = 0; i < count; i++)
+            {
+                var element = CreateNewObject();
+                element.gameObject.SetActive(false);
+                _freeObjects.Enqueue(element);
+            }
+        }
 
         public virtual void Unload()
         {
@@ -73,6 +97,24 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
                 return (null, default);
             }
             
+            var handle = Addressables.LoadAssetAsync<GameObject>(address);
+            await handle.Task;
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                var prefab = handle.Result;
+                var instance = Object.Instantiate(prefab, parentTransform);
+                return (instance, handle);
+            }
+            else
+            {
+                Debug.LogError($"Failed to load asset with address: {address}");
+                return (null, default);
+            }
+        }
+        
+        private static async Task<(GameObject instance, AsyncOperationHandle<GameObject> handle)> LoadAndInstantiateAsync(AssetReference address, Transform parentTransform)
+        {
             var handle = Addressables.LoadAssetAsync<GameObject>(address);
             await handle.Task;
 

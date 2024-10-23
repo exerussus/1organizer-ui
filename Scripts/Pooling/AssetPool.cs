@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Exerussus._1OrganizerUI.Scripts.Pooling
 {
@@ -20,7 +21,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
         {
             if (_jobs.ContainsKey(name))
             {
-                _jobs[name].Enqueue(new Job(name, path, Vector3.zero, Quaternion.identity, action));
+                _jobs[name].Enqueue(new Job(Vector3.zero, Quaternion.identity, action));
                 return;
             }
             
@@ -29,7 +30,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
             {
                 var job = new Queue<Job>();
                 _jobs[name] = job;
-                job.Enqueue(new Job(name, path, Vector3.zero, Quaternion.identity, action));
+                job.Enqueue(new Job(Vector3.zero, Quaternion.identity, action));
                 InitializePool(name, path);
             }
         }
@@ -38,7 +39,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
         {
             if (_jobs.ContainsKey(name))
             {
-                _jobs[name].Enqueue(new Job(name, path, position, Quaternion.identity, action));
+                _jobs[name].Enqueue(new Job(position, Quaternion.identity, action));
                 return;
             }
             
@@ -47,8 +48,26 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
             {
                 var job = new Queue<Job>();
                 _jobs[name] = job;
-                job.Enqueue(new Job(name, path, position, Quaternion.identity, action));
+                job.Enqueue(new Job(position, Quaternion.identity, action));
                 InitializePool(name, path);
+            }
+        }
+
+        public void GetAndExecute(string assetName, AssetReference assetReference, Vector3 position, Action<T> action)
+        {
+            if (_jobs.ContainsKey(assetName))
+            {
+                _jobs[assetName].Enqueue(new Job(position, Quaternion.identity, action));
+                return;
+            }
+            
+            if (HasPool(assetName)) action(_assetPool[assetName].GetObject(position, Quaternion.identity));
+            else
+            {
+                var job = new Queue<Job>();
+                _jobs[assetName] = job;
+                job.Enqueue(new Job(position, Quaternion.identity, action));
+                InitializePool(assetName, assetReference);
             }
         }
 
@@ -56,7 +75,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
         {
             if (_jobs.ContainsKey(name))
             {
-                _jobs[name].Enqueue(new Job(name, path, position, quaternion, action));
+                _jobs[name].Enqueue(new Job(position, quaternion, action));
                 return;
             }
             
@@ -65,7 +84,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
             {
                 var job = new Queue<Job>();
                 _jobs[name] = job;
-                job.Enqueue(new Job(name, path, position, quaternion, action));
+                job.Enqueue(new Job(position, quaternion, action));
                 InitializePool(name, path);
             }
         }
@@ -75,6 +94,17 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
             var pool = new AddressablePoolObject<T>();
                 
             await pool.InitPrefab(name, path, false, 5);
+            _assetPool[name] = pool;
+
+            foreach (var job in _jobs[name]) job.Action(_assetPool[name].GetObject(job.Position, job.Quaternion));
+            _jobs.Remove(name);
+        }
+
+        private async void InitializePool(string name, AssetReference assetReference)
+        {
+            var pool = new AddressablePoolObject<T>();
+                
+            await pool.InitPrefab(name, assetReference, false, 5);
             _assetPool[name] = pool;
 
             foreach (var job in _jobs[name]) job.Action(_assetPool[name].GetObject(job.Position, job.Quaternion));
@@ -97,7 +127,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
 
         private struct Job
         {
-            public Job(string name, string path, Vector3 position, Quaternion quaternion, Action<T> action)
+            public Job(Vector3 position, Quaternion quaternion, Action<T> action)
             {
                 Position = position;
                 Quaternion = quaternion;
