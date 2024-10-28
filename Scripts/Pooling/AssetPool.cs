@@ -17,6 +17,13 @@ namespace Exerussus._1OrganizerUI.Scripts.Pooling
             _assetPool[name] = newPool;
         }
 
+        public async void Initialize(string name, AssetReference reference)
+        {
+            var newPool = new AddressablePoolObject<T>();
+            await newPool.InitPrefab(name, reference, false, 5);
+            _assetPool[name] = newPool;
+        }
+
         public void GetAndExecute(string name, string path, Action<T> action)
         {
             if (_jobs.ContainsKey(name))
