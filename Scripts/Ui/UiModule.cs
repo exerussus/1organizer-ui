@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Exerussus._1Extensions.SmallFeatures;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -17,7 +18,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         public IObjectUI UIObject { get; private set; }
         private Transform _parent;
         private GameObject _loadedInstance;
-        private ShareData _mSharedData;
+        private GameShare _mSharedData;
         public GameObject LoadedInstance => _loadedInstance;
 
         private AsyncOperationHandle<GameObject> _handle;
@@ -33,11 +34,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             UIObject.Deactivate();
         }
         
-        public virtual void Show(ShareData shareData, Transform transform)
+        public virtual void Show(GameShare shareData, Transform transform, Action onLoad = null)
         {
             if (IsActivated) UIObject.UpdateObject();
             
-            if (UIObject == null) Load(shareData, transform);
+            if (UIObject == null) Load(shareData, transform, onLoad);
             
             if (UIObject != null)
             {
@@ -51,7 +52,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             UIObject?.UpdateObject();
         }
 
-        public virtual async void Load(ShareData shareData, Transform transform)
+        public virtual async void Load(GameShare shareData, Transform transform, Action onLoad)
         {
             if (_isLoading) return;
             _mSharedData = shareData;
@@ -65,7 +66,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            UIObject = _loadedInstance.GetComponent<IObjectUI>();
            UIObject.Initialize(shareData);
            UIObject.Activate();
-           _mSharedData.GetObject<OrganizerActions>().Sorting.Invoke();
+           onLoad?.Invoke();
+           _mSharedData.GetSharedObject<OrganizerActions>().Sorting.Invoke();
            IsActivated = true;
            _isLoading = false;
         }

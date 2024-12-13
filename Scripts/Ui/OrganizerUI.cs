@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Exerussus._1Extensions.SmallFeatures;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.Ui
@@ -8,12 +9,12 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
     public abstract class OrganizerUI<TModule> : MonoBehaviour
     where TModule : UiModule
     {
-        [SerializeField] private bool autoStart;
-        [SerializeField] private bool dontDestroyOnLoad;
-        [SerializeField] private ShareData shareData;
-        [SerializeField] private List<TModule> modules = new();
-        [SerializeField] private List<string> enabledModules = new();
-        [SerializeField] private Transform _parentTransform;
+        [SerializeField] protected bool autoStart;
+        [SerializeField] protected bool dontDestroyOnLoad;
+        [SerializeField] protected GameShare shareData;
+        [SerializeField] protected List<TModule> modules = new();
+        [SerializeField] protected List<string> enabledModules = new();
+        [SerializeField] protected Transform _parentTransform;
         
         private List<string> _disabledModules = new();
         private Dictionary<string, TModule> _modulesDict;
@@ -33,12 +34,12 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         public void Initialize()
         {
             if (dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
-            shareData = new ShareData();
+            shareData = new GameShare();
             _modulesDict = new();
             _groupsDict = new();
             SetShareData(shareData);
             
-            shareData.AddObject(new OrganizerActions{ Sorting = Sort});
+            shareData.AddSharedObject(new OrganizerActions{ Sorting = Sort});
             
             PreInitialize();
             
@@ -90,7 +91,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
-        public void ShowModule(string uiName)
+        public void ShowModule(string uiName, Action onLoad = null)
         {
             if (_modulesDict.TryGetValue(uiName, out var uiModule))
             {
@@ -101,7 +102,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 }
                 
                 MoveToEnabledList(uiModule.Name);
-                uiModule.Show(shareData, _parentTransform);
+                uiModule.Show(shareData, _parentTransform, onLoad);
             }
         }
 
@@ -192,7 +193,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         protected virtual void PreInitialize() {}
         protected virtual void OnInitialize() {}
-        protected abstract void SetShareData(ShareData shareData);
+        protected abstract void SetShareData(GameShare shareData);
 
     }
     public class OrganizerActions
