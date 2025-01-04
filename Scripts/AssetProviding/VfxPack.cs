@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
+    [CreateAssetMenu(menuName = "Exerussus/AssetProviding/VfxPack", fileName = "VfxPack")]
     public class VfxPack : SerializedScriptableObject
     {
         [SerializeField, ReadOnly] private bool hasStart;

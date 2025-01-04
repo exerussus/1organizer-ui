@@ -5,13 +5,12 @@ using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
-    public class GroupReferencePack<T> : SerializedScriptableObject, IGroupReferencePack<T>
-    where T : AssetReferencePack
+    [CreateAssetMenu(menuName = "Exerussus/AssetProviding/GroupReferencePack", fileName = "GroupReferencePack")]
+    public class GroupReferencePack : SerializedScriptableObject, IGroupReferencePack
 {
-        [SerializeField] private List<T> assetPacks;
-        public virtual string IconPath => "";
+        [SerializeField] private List<AssetReferencePack> assetPacks;
 
-        public List<T> AssetPacks
+        public List<AssetReferencePack> AssetPacks
         {
             get => assetPacks;
             set => assetPacks = value;
@@ -20,6 +19,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public virtual void TypeValidate() { }
 
 #if UNITY_EDITOR
+
         public bool IsValidEditor { get; set; } = true;
         private bool _needValidateCyberAssets = false;
 
@@ -27,7 +27,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             _needValidateCyberAssets = false;
             
-            var allInstances = UnityEditor.AssetDatabase.FindAssets("t:CyberAssets");
+            var allInstances = UnityEditor.AssetDatabase.FindAssets("t:AssetProvider");
 
             foreach (var guid in allInstances)
             {
@@ -37,7 +37,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                     Debug.LogWarning($"Asset with GUID {guid} has an invalid path and will be skipped.");
                     continue;
                 }
-                var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<AssetProvider<GroupReferencePack<T>, T>>(path);
+                var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<AssetProvider>(path);
                 if (instance == null)
                 {
                     Debug.LogWarning($"Asset at path '{path}' could not be loaded and will be skipped.");
@@ -65,15 +65,16 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private void OnValidate()
         {
             ChangeIcon();
+            
             if (_needValidateCyberAssets) InvokeValidateCyberAssets();
         }
         
         private void ChangeIcon()
         {
             if (m_hasIcon) return;
-            if (string.IsNullOrEmpty(IconPath)) return;
             
-            var icon = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(IconPath);
+            var resource = Resources.Load<AssetProviderSettings>("AssetProviderSettings");
+            var icon = resource.GroupReferenceTexture;
             if (icon == null) return;
 
             var path = UnityEditor.AssetDatabase.GetAssetPath(this);
@@ -102,7 +103,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (assetPath.EndsWith(".asset"))
             {
-                var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<GroupReferencePack<T>>(assetPath);
+                var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<GroupReferencePack>(assetPath);
                 if (asset != null)
                 {
                     asset.IsValidEditor = false;

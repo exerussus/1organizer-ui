@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Exerussus._1Extensions.Abstractions;
+using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine.AddressableAssets;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
@@ -31,8 +32,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         string[] TagDropdown();
     }
 
-    public interface IGroupReferencePack<T> where T : IAssetReferencePack
+    public interface IGroupReferencePack
     {
-        public List<T> AssetPacks { get; set; }
+        public List<AssetReferencePack> AssetPacks { get; set; }
     }
 }

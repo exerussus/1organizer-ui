@@ -2,23 +2,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sirenix.OdinInspector;
-using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
-    public abstract class AssetProvider<TRefGroup, TRefPack> : SerializedScriptableObject, IAssetProvider
-    where TRefGroup : GroupReferencePack<TRefPack>
-    where TRefPack : AssetReferencePack
+    [CreateAssetMenu(menuName = "Exerussus/AssetProviding/AssetProvider", fileName = "AssetProvider")]
+    public class AssetProvider : SerializedScriptableObject, IAssetProvider
     {
-        
-        [SerializeField] private List<AssetReferenceT<TRefGroup>> groupReferences;
+        [SerializeField] private List<AssetReferenceT<GroupReferencePack>> groupReferences;
 #if UNITY_EDITOR
-        [SerializeField] private List<AssetReferenceT<TRefGroup>> unusedGroupReferences = new();
+        [SerializeField] private List<AssetReferenceT<GroupReferencePack>> unusedGroupReferences = new();
 #endif
-        [SerializeField, ReadOnly] private List<TRefGroup> groups = new();
+        [SerializeField, ReadOnly] private List<GroupReferencePack> groups = new();
         
         private Dictionary<string, IAssetReferencePack> _vfxPacksDict = new();
         private Dictionary<string, IAssetReferencePack> _assetPacks = new();
@@ -28,15 +25,14 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
 
         public virtual string IconPath => "";
-        public abstract string AssetProviderInstancePath { get; }
-        public List<TRefGroup> Groups => groups;
+        public List<GroupReferencePack> Groups => groups;
         public bool IsLoaded { get; private set; }
         
         public async Task InitializeAsync()
         {
             Clear(); 
-            var handles = new List<AsyncOperationHandle<TRefGroup>>();
-            var taskArray = new Task<TRefGroup>[groupReferences.Count];
+            var handles = new List<AsyncOperationHandle<GroupReferencePack>>();
+            var taskArray = new Task<GroupReferencePack>[groupReferences.Count];
 
             for (var index = 0; index < groupReferences.Count; index++)
             {
@@ -324,7 +320,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         continue;
                     }
 
-                    var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<TRefGroup>(path);
+                    var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<GroupReferencePack>(path);
 
                     if (instance == null)
                     {
@@ -334,7 +330,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                     
                     if (!instance.IsValidEditor) continue;
                     
-                    unusedGroupReferences.Add(new AssetReferenceT<TRefGroup>(guid));
+                    unusedGroupReferences.Add(new AssetReferenceT<GroupReferencePack>(guid));
                 }
             }
 
@@ -362,7 +358,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
                         var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
                 
-                        if (asset != null && asset.GetType().IsSubclassOf(typeof(AssetProvider<,>)))
+                        if (asset != null && asset.GetType().IsSubclassOf(typeof(AssetProvider)))
                         {
                             assets.Add(asset);
                         }

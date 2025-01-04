@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine.AddressableAssets;
 
@@ -9,9 +8,9 @@ namespace Source.Scripts.Global.Managers.AssetManagement
     [Serializable]
     public class AssetReferencePack : IAssetReferencePack
     {
-        [ValueDropdown("$IdDropdown")] public string id;
-        [ValueDropdown("$TypeDropdown")] public string assetType;
-        [ValueDropdown("$TagDropdown")] public List<string> tags = new();
+        public string id;
+        public string assetType;
+        public List<string> tags = new();
         public AssetReference reference;
 
         public string Id
