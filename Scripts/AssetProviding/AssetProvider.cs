@@ -349,27 +349,15 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             {
                 if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode || state == UnityEditor.PlayModeStateChange.ExitingEditMode)
                 {
-                    string[] assetGuids = UnityEditor.AssetDatabase.FindAssets("t:ScriptableObject");
-                    List<ScriptableObject> assets = new List<ScriptableObject>();
+                    string[] assetGuids = UnityEditor.AssetDatabase.FindAssets("t:AssetProvider");
+                    List<AssetProvider> assets = new List<AssetProvider>();
 
                     foreach (string guid in assetGuids)
                     {
                         string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                        var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+                        var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<AssetProvider>(path);
                 
-                        if (asset != null && asset.GetType().IsSubclassOf(typeof(AssetProvider)))
-                        {
-                            assets.Add(asset);
-                        }
-                    }
-
-                    foreach (var asset in assets)
-                    {
-                        var clearMethod = asset.GetType().GetMethod("Clear");
-                        if (clearMethod != null)
-                        {
-                            clearMethod.Invoke(asset, null);
-                        }
+                        if (asset != null) asset.Clear();
                     }
                 }
             }
