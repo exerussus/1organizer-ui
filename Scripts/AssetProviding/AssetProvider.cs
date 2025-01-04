@@ -23,8 +23,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
         private Dictionary<string, int> _assetPackReferenceCounts = new();
         private Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
-
-        public virtual string IconPath => "";
         public List<GroupReferencePack> Groups => groups;
         public bool IsLoaded { get; private set; }
         
@@ -285,9 +283,10 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private void ChangeIcon()
         {
             if (m_hasIcon) return;
-            if (string.IsNullOrEmpty(IconPath)) return;
             
-            var icon = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(IconPath);
+            var resource = Resources.Load<AssetProviderSettings>("AssetProviderSettings");
+            var icon = resource.AssetProviderTexture;
+            
             if (icon == null) return;
 
             var path = UnityEditor.AssetDatabase.GetAssetPath(this);

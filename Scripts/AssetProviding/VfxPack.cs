@@ -38,9 +38,10 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private void ChangeIcon()
         {
             if (m_hasIcon) return;
-            if (string.IsNullOrEmpty(IconPath)) return;
             
-            var icon = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(IconPath);
+            var resource = Resources.Load<AssetProviderSettings>("AssetProviderSettings");
+            var icon = resource.VfxPackTexture;
+            
             if (icon == null) return;
 
             var path = UnityEditor.AssetDatabase.GetAssetPath(this);
