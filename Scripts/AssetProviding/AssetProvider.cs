@@ -30,6 +30,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public virtual string IconPath => "";
         public abstract string AssetProviderInstancePath { get; }
         public List<TRefGroup> Groups => groups;
+        public bool IsLoaded { get; private set; }
         
         public async Task InitializeAsync()
         {
@@ -83,6 +84,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             }
 
             Debug.Log("AssetManager initialization completed.");
+            IsLoaded = true;
         }
         
         public List<IAssetReferencePack> GetPacksByType(string type)
@@ -260,6 +262,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _assetPackHandles.Clear();
             _vfxPacksDict.Clear();
             _loadedHandles.Clear();
+            IsLoaded = false;
         }
         
         public async void Initialize()
