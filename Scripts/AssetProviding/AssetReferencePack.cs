@@ -11,8 +11,8 @@ namespace Source.Scripts.Global.Managers.AssetManagement
     {
         [ValueDropdown("$IdDropdown")] public string id;
         [ValueDropdown("$TypeDropdown")] public string assetType;
-        [ValueDropdown("$TagDropdown")] public AssetReference reference;
-        public List<string> tags = new();
+        [ValueDropdown("$TagDropdown")] public List<string> tags = new();
+        public AssetReference reference;
 
         public string Id
         {
