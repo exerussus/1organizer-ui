@@ -16,9 +16,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         [SerializeField] protected GameShare shareData;
         [SerializeField] protected List<TModule> modules = new();
         [SerializeField] protected List<string> enabledModules = new();
+        [SerializeField] protected List<string> disabledModules = new();
         [SerializeField] protected Transform _parentTransform;
         
-        private List<string> _disabledModules = new();
+        private readonly HashSet<string> _enabledModules = new();
+        private readonly HashSet<string> _disabledModules = new();
         private Dictionary<string, TModule> _modulesDict;
         private Dictionary<string, List<TModule>> _groupsDict;
 
@@ -65,7 +67,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             foreach (var uiModule in modules)
             {
-                if (enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, _parentTransform);
+                if (_enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, _parentTransform);
                 else _disabledModules.Add(uiModule.Name);
             }
         }
@@ -88,16 +90,20 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             if (_disabledModules.Contains(uiName))
             {
                 _disabledModules.Remove(uiName);
-                enabledModules.Add(uiName);
+                _enabledModules.Add(uiName);
+                enabledModules = new List<string>(enabledModules);
+                disabledModules = new List<string>(_disabledModules);
             }
         }
 
         private void MoveToDisabledList(string uiName)
         {
-            if (enabledModules.Contains(uiName))
+            if (_enabledModules.Contains(uiName))
             {
-                enabledModules.Remove(uiName);
+                _enabledModules.Remove(uiName);
                 _disabledModules.Add(uiName);
+                enabledModules = new List<string>(enabledModules);
+                disabledModules = new List<string>(_disabledModules);
             }
         }
 
@@ -105,7 +111,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         {
             if (_modulesDict.TryGetValue(uiName, out var uiModule))
             {
-                if (enabledModules.Contains(uiName))
+                if (_enabledModules.Contains(uiName))
                 {
                     uiModule.UpdateModule();
                     return;
@@ -160,7 +166,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         {
             if (_modulesDict.TryGetValue(uiName, out var uiModule))
             {
-                if (enabledModules.Contains(uiModule.Name))
+                if (_enabledModules.Contains(uiModule.Name))
                 {
                     MoveToDisabledList(uiModule.Name);
                     uiModule.Hide();
@@ -173,7 +179,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         {
             if (_groupsDict.TryGetValue(groupName, out var group)) foreach (var uiModule in group)
             {
-                if (enabledModules.Contains(uiModule.Name))
+                if (_enabledModules.Contains(uiModule.Name))
                 {
                     MoveToDisabledList(uiModule.Name);
                     uiModule.Hide();
