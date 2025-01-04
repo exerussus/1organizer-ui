@@ -104,10 +104,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
-                if (_assetPackReferenceCounts.ContainsKey(packId))
-                    _assetPackReferenceCounts[packId]++;
-                else
-                    _assetPackReferenceCounts[packId] = 1;
+                if (_assetPackReferenceCounts.ContainsKey(packId)) _assetPackReferenceCounts[packId]++;
+                else _assetPackReferenceCounts[packId] = 1;
 
                 if (handle.Status == AsyncOperationStatus.Succeeded) return handle.Result as T;
                 await handle.Task;

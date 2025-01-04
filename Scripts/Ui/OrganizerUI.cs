@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Exerussus._1Extensions.SmallFeatures;
+using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.Ui
@@ -20,6 +21,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         private Dictionary<string, TModule> _modulesDict;
         private Dictionary<string, List<TModule>> _groupsDict;
 
+        public abstract IAssetProvider AssetProvider { get; }
+
         public Transform ParentTransform
         {
             get => _parentTransform;
@@ -37,9 +40,13 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             shareData = new GameShare();
             _modulesDict = new();
             _groupsDict = new();
+            shareData.AddSharedObject(typeof(IAssetProvider), AssetProvider);
+            shareData.AddSharedObject(AssetProvider.GetType(), AssetProvider);
             SetShareData(shareData);
             
             shareData.AddSharedObject(new OrganizerActions{ Sorting = Sort});
+
+            foreach (var uiModule in modules) uiModule.Inject(shareData);    
             
             PreInitialize();
             

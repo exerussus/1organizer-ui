@@ -1,30 +1,35 @@
 ﻿using System;
-using System.Threading.Tasks;
+using Exerussus._1Extensions.Abstractions;
 using Exerussus._1Extensions.SmallFeatures;
+using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
 namespace Exerussus._1OrganizerUI.Scripts.Ui
 {
     [Serializable]
-    public abstract class UiModule
+    public abstract class UiModule : IInjectable
     {
         public abstract string Name { get; protected set; }
-        public abstract string ResourcePath { get; protected set; }
         public abstract string Group { get; protected set; }
         public abstract int Order { get; protected set; }
         public IObjectUI UIObject { get; private set; }
+        private IAssetProvider _assetProvider;
         private Transform _parent;
         private GameObject _loadedInstance;
         private GameShare _mSharedData;
         public GameObject LoadedInstance => _loadedInstance;
-
-        private AsyncOperationHandle<GameObject> _handle;
         private bool _isLoading;
         
         public bool IsActivated { get; private set; }
+
+        public void Inject(GameShare gameShare)
+        {
+            gameShare.GetSharedObject(ref _assetProvider);
+            OnInjectSharedData(gameShare);
+        }
+        
+        public virtual void OnInjectSharedData(GameShare gameShare) {}
         
         public virtual void Hide()
         {
@@ -58,9 +63,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             _mSharedData = shareData;
            _parent = transform;
            _isLoading = true;
-           var loadResult = await LoadAndInstantiateAsync(ResourcePath, _parent);
-           _loadedInstance = loadResult.instance;
-           _handle = loadResult.handle;
+           
+           var (result, asset) = await _assetProvider.TryLoadAssetPackAsync<GameObject>(Name);
+           if (!result) return;
+           
+           _loadedInstance = Object.Instantiate(asset, _parent);
 
            if (_loadedInstance == null) return;
            UIObject = _loadedInstance.GetComponent<IObjectUI>();
@@ -81,36 +88,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 Object.Destroy(_loadedInstance);
                 _loadedInstance = null;
-            }
-
-            if (_handle.IsValid())
-            {
-                Addressables.Release(_handle);
-                _handle = default;
-            }
-        }
-        
-        public static async Task<(GameObject instance, AsyncOperationHandle<GameObject> handle)> LoadAndInstantiateAsync(string address, Transform parentTransform)
-        {
-            if (string.IsNullOrEmpty(address))
-            {
-                Debug.LogError("Address is null or empty.");
-                return (null, default);
-            }
-            
-            var handle = Addressables.LoadAssetAsync<GameObject>(address);
-            await handle.Task;
-
-            if (handle.Status == AsyncOperationStatus.Succeeded)
-            {
-                var prefab = handle.Result;
-                var instance = Object.Instantiate(prefab, parentTransform);
-                return (instance, handle);
-            }
-            else
-            {
-                Debug.LogError($"Failed to load asset with address: {address}");
-                return (null, default);
+                _assetProvider.UnloadAssetPack(Name);
             }
         }
     }
