@@ -9,12 +9,9 @@ namespace Source.Scripts.Global.Managers.AssetManagement
     [Serializable]
     public class AssetReferencePack : IAssetReferencePack
     {
-        public string id;
-#if ODIN_INSPECTOR
-        [ValueDropdown("$TypeDropdown")] 
-#endif
-        public string assetType;
-        public AssetReference reference;
+        [ValueDropdown("$IdDropdown")] public string id;
+        [ValueDropdown("$TypeDropdown")] public string assetType;
+        [ValueDropdown("$TagDropdown")] public AssetReference reference;
         public List<string> tags = new();
 
         public string Id
