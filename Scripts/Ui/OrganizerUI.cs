@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Exerussus._1Extensions.Async;
 using Exerussus._1Extensions.SmallFeatures;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine;
@@ -34,7 +35,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             if (autoStart) Initialize();
         }
 
-        public void Initialize()
+        public async void Initialize()
         {
             if (dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
             shareData = new GameShare();
@@ -46,7 +47,9 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             shareData.AddSharedObject(new OrganizerActions{ Sorting = Sort});
 
-            foreach (var uiModule in modules) uiModule.Inject(shareData);    
+            foreach (var uiModule in modules) uiModule.Inject(shareData);
+
+            await TaskUtils.WaitUntilAsync(() => AssetProvider.IsLoaded);
             
             PreInitialize();
             

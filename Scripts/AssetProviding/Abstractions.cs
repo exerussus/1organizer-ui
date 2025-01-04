@@ -17,6 +17,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public void UnloadAssetPack(string packId);        
         public void OnBeforeInitialize() {}
         public void OnInitialize() {}
+        public bool IsLoaded { get; }
     }
     
     public interface IAssetReferencePack
