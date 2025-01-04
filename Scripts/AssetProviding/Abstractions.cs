@@ -27,9 +27,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public string AssetType { get; set; }
         public AssetReference Reference { get; set; }
         public List<string> Tags { get; set; }
-        string[] TypeDropdown();
-        string[] IdDropdown();
-        string[] TagDropdown();
     }
 
     public interface IGroupReferencePack

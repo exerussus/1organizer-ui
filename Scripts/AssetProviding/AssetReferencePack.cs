@@ -36,23 +36,5 @@ namespace Source.Scripts.Global.Managers.AssetManagement
             get => tags;
             set => tags = value;
         }
-
-        public virtual string[] TypeDropdown()
-        {
-            return new []{ 
-                AssetConstants.VfxPack, 
-                AssetConstants.Sprite 
-            };
-        }
-
-        public virtual string[] IdDropdown()
-        {
-            return new []{""};
-        }
-        
-        public virtual string[] TagDropdown()
-        {
-            return new []{""};
-        }
     }
 }
