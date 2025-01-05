@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Source.Scripts.Global.Managers.AssetManagement;
+using UnityEditor;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
@@ -64,7 +65,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         private void OnValidate()
         {
-            ChangeIcon();
+            //ChangeIcon();
             
             if (_needValidateCyberAssets) InvokeValidateCyberAssets();
         }
@@ -73,7 +74,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (m_hasIcon) return;
             
-            var resource = Resources.Load<AssetProviderSettings>("AssetProviderSettings");
+            var resource = AssetDatabase.LoadAssetAtPath<AssetProviderSettings>("Packages/com.exerussus.1organizer-ui/Editor/AssetProviderSettings.asset") ?? 
+                           AssetDatabase.LoadAssetAtPath<AssetProviderSettings>("Assets/Plugins/Exerussus/1OrganizerUI/Editor/AssetProviderSettings.asset");
             var icon = resource.GroupReferenceTexture;
             if (icon == null) return;
 

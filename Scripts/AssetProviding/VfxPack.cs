@@ -30,7 +30,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             hasStart = start is { Length: > 0 };
             hasProcess = process is { Length: > 0 };
             hasEnd = end is { Length: > 0 };
-            ChangeIcon();
+            //ChangeIcon();
         }
         
         [SerializeField, HideInInspector] private bool m_hasIcon;

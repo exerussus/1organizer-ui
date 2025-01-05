@@ -275,7 +275,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         [Button("Validate")]
         public virtual void OnValidate()
         {
-            ChangeIcon();
+            //ChangeIcon();
             FillUnusedPacks();
         }
         
