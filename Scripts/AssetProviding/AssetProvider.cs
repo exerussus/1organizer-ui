@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sirenix.OdinInspector;
+using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -62,10 +63,13 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 else Debug.LogError($"Failed to load GroupReference: {groupRef.RuntimeKey}");
             }
 
+            var dict = new Dictionary<string, GroupReferencePack>();
+
             foreach (var group in groups)
             {
                 foreach (var assetReferencePack in group.AssetPacks)
                 {
+                    dict.Add(assetReferencePack.Id, group);
                     if (!_typePacks.TryGetValue(assetReferencePack.AssetType, out var packList))
                     {
                         packList = new List<IAssetReferencePack>();
@@ -73,7 +77,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                     }
 
                     packList.Add(assetReferencePack);
-                    if (!_assetPacks.TryAdd(assetReferencePack.Id, assetReferencePack)) Debug.LogWarning($"Duplicate AssetPack ID detected: {assetReferencePack.Id}");
+                    if (!_assetPacks.TryAdd(assetReferencePack.Id, assetReferencePack))
+                    {
+                        Debug.LogError($"Duplicate AssetPack ID detected: {assetReferencePack.Id}", group);
+                        Debug.LogError($"Already exist AssetPack >>> ping", dict[assetReferencePack.Id]);
+                    }
                 }
             }
 
