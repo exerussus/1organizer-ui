@@ -69,7 +69,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             {
                 foreach (var assetReferencePack in group.AssetPacks)
                 {
-                    dict.Add(assetReferencePack.Id, group);
                     if (!_typePacks.TryGetValue(assetReferencePack.AssetType, out var packList))
                     {
                         packList = new List<IAssetReferencePack>();
@@ -82,6 +81,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         Debug.LogError($"Duplicate AssetPack ID detected: {assetReferencePack.Id}", group);
                         Debug.LogError($"Already exist AssetPack >>> ping", dict[assetReferencePack.Id]);
                     }
+                    else dict.Add(assetReferencePack.Id, group);
                 }
             }
 
