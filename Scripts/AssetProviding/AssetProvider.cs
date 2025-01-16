@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Sirenix.OdinInspector;
-using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -12,18 +12,18 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     [CreateAssetMenu(menuName = "Exerussus/AssetProviding/AssetProvider", fileName = "AssetProvider")]
     public class AssetProvider : SerializedScriptableObject, IAssetProvider
     {
-        [SerializeField] private List<AssetReferenceT<GroupReferencePack>> groupReferences;
+        [SerializeField] protected List<AssetReferenceT<GroupReferencePack>> groupReferences;
 #if UNITY_EDITOR
-        [SerializeField] private List<AssetReferenceT<GroupReferencePack>> unusedGroupReferences = new();
+        [SerializeField] protected List<AssetReferenceT<GroupReferencePack>> unusedGroupReferences = new();
 #endif
-        [SerializeField, ReadOnly] private List<GroupReferencePack> groups = new();
+        [SerializeField, ReadOnly] protected List<GroupReferencePack> groups = new();
         
-        private Dictionary<string, IAssetReferencePack> _vfxPacksDict = new();
-        private Dictionary<string, IAssetReferencePack> _assetPacks = new();
-        private Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
-        private Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
-        private Dictionary<string, int> _assetPackReferenceCounts = new();
-        private Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
+        protected Dictionary<string, IAssetReferencePack> _vfxPacksDict = new();
+        protected Dictionary<string, IAssetReferencePack> _assetPacks = new();
+        protected Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
+        protected Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
+        protected Dictionary<string, int> _assetPackReferenceCounts = new();
+        protected Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
         public List<GroupReferencePack> Groups => groups;
         public bool IsLoaded { get; private set; }
         
@@ -171,6 +171,46 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 return (true, newHandle.Result as VfxPack);
 
             Debug.LogError($"Failed to load AssetPack with ID: {packId}");
+            _assetPackHandles.Remove(packId);
+            _assetPackReferenceCounts.Remove(packId);
+            return (false, null);
+        }
+        
+        public async Task<(bool, T)> TryLoadAssetPackAsync<T>(string packId, Action<string, LogType> messageCallback) where T : UnityEngine.Object
+        {
+            if (_assetPackHandles.TryGetValue(packId, out var handle))
+            {
+                if (_assetPackReferenceCounts.ContainsKey(packId)) _assetPackReferenceCounts[packId]++;
+                else _assetPackReferenceCounts[packId] = 1;
+
+                if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as T);
+                await handle.Task;
+
+                if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as T);
+                messageCallback.Invoke($"Failed to load AssetPack with ID: {packId}", LogType.Error);
+                return (false, null);
+            }
+
+            if (!_assetPacks.TryGetValue(packId, out var assetPack))
+            {
+                messageCallback.Invoke($"AssetPack with ID {packId} not found!", LogType.Error);
+                return (false, null);
+            }
+            
+            messageCallback.Invoke($"Loading new asset pack: {packId}, type: {typeof(T)}", LogType.Log);
+            
+            var newHandle = assetPack.Reference.LoadAssetAsync<T>();
+            _assetPackHandles.Add(packId, newHandle);
+            _assetPackReferenceCounts[packId] = 1;
+            await newHandle.Task;
+
+            if (newHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                messageCallback.Invoke($"Loading successful: {packId}, type: {typeof(T)}", LogType.Log);
+                return (true, newHandle.Result as T);
+            }
+
+            messageCallback.Invoke($"Failed to load AssetPack with ID: {packId}", LogType.Error);
             _assetPackHandles.Remove(packId);
             _assetPackReferenceCounts.Remove(packId);
             return (false, null);
