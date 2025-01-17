@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Exerussus._1OrganizerUI.Scripts.Ui
 {
     public abstract class OrganizerUI<TModule> : MonoBehaviour
-    where TModule : UiModule
+    where TModule : UiModule, new()
     {
         [SerializeField] protected bool autoStart;
         [SerializeField] protected bool dontDestroyOnLoad;
@@ -50,9 +50,26 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             shareData.AddSharedObject(new OrganizerActions{ Sorting = Sort});
 
-            foreach (var uiModule in modules) uiModule.Inject(shareData);
-
             await TaskUtils.WaitUntilAsync(() => AssetProvider.IsLoaded);
+
+            var allPacks = AssetProvider.GetPacksByType(AssetConstants.UiPanel);
+            if (allPacks.Count > 0)
+            {
+                var list = allPacks.Select(referencePack => referencePack.Reference.LoadAssetAsync<PanelUiPack>().Task).ToList();
+                await Task.WhenAll(list);
+                foreach (var task in list)
+                {
+                    var panelUiPack = task.Result;
+                    var newModule = new TModule();
+                    var handle = new UiModule.UiModuleHandle(newModule);
+                    handle.name = panelUiPack.id;
+                    handle.group = panelUiPack.group;
+                    handle.order = panelUiPack.order;
+                    modules.Add(newModule);
+                }
+            }
+
+            foreach (var uiModule in modules) uiModule.Inject(shareData);
             
             PreInitialize();
             

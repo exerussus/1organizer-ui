@@ -91,5 +91,33 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 _assetProvider.UnloadAssetPack(Name);
             }
         }
+
+        public class UiModuleHandle
+        {
+            public UiModuleHandle(UiModule module)
+            {
+                uiModule = module;
+            }
+
+            public UiModule uiModule;
+            
+            public string name
+            {
+                get => uiModule.Name;
+                set => uiModule.Name = value;
+            }
+            
+            public string group
+            {
+                get => uiModule.Group;
+                set => uiModule.Group = value;
+            }
+            
+            public int order
+            {
+                get => uiModule.Order;
+                set => uiModule.Order = value;
+            }
+        }
     }
 }
