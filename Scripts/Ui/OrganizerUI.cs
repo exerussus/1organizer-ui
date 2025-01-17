@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Exerussus._1Extensions.Async;
 using Exerussus._1Extensions.SmallFeatures;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
@@ -34,10 +35,10 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         public void Start()
         {
-            if (autoStart) Initialize();
+            if (autoStart) _ = Initialize();
         }
 
-        public async void Initialize()
+        public async Task Initialize()
         {
             if (dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
             shareData = new GameShare();
