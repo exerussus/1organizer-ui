@@ -62,6 +62,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                     handle.name = panelUiPack.id;
                     handle.group = panelUiPack.group;
                     handle.order = panelUiPack.order;
+                    handle.initedByAssetProvider = true;
                     modules.Add(newModule);
                 }
             }

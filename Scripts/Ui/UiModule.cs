@@ -119,6 +119,12 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 get => uiModule.Order;
                 set => uiModule.Order = value;
             }
+            
+            public bool initedByAssetProvider
+            {
+                get => uiModule._initedByAssetProvider;
+                set => uiModule._initedByAssetProvider = value;
+            }
         }
     }
 }
