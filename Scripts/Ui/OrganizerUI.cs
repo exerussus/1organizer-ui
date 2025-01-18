@@ -52,14 +52,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
             await TaskUtils.WaitUntilAsync(() => AssetProvider.IsLoaded);
 
-            var allPacks = AssetProvider.GetPacksByType(AssetConstants.UiPanel);
+            var allPacks = AssetProvider.GetAllPanelUiPacks();
             if (allPacks.Count > 0)
             {
-                var list = allPacks.Select(referencePack => referencePack.Reference.LoadAssetAsync<PanelUiPack>().Task).ToList();
-                await Task.WhenAll(list);
-                foreach (var task in list)
+                foreach (var panelUiPack in allPacks)
                 {
-                    var panelUiPack = task.Result;
                     var newModule = new TModule();
                     var handle = new UiModule.UiModuleHandle(newModule);
                     handle.name = panelUiPack.id;

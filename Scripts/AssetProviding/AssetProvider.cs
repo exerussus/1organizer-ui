@@ -61,11 +61,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         foreach (var assetPack in group.AssetPacks)
                         {
                             if (assetPack.AssetType == AssetConstants.VfxPack) _vfxPacksDict[assetPack.Id] = assetPack;
-                            else if (assetPack.AssetType == AssetConstants.UiPanel)
-                            {
-                                var pack = await LoadAssetPackAsync<PanelUiPack>(assetPack.Id);
-                                if (pack != null) _uiPanelsDict[assetPack.Id] = pack;
-                            }
                         }
                     }
                     else Debug.LogWarning($"Duplicate GroupReference loaded: {group.name}");
@@ -92,6 +87,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         Debug.LogError($"Already exist AssetPack >>> ping", dict[assetReferencePack.Id]);
                     }
                     else dict.Add(assetReferencePack.Id, group);
+                    
+                    if (assetReferencePack.AssetType == AssetConstants.UiPanel)
+                    {
+                        var pack = await LoadAssetPackAsync<PanelUiPack>(assetReferencePack.Id);
+                        if (pack != null) _uiPanelsDict[assetReferencePack.Id] = pack;
+                    }
                 }
             }
 
@@ -99,7 +100,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             IsLoaded = true;
         }
 
-        public async Task<(bool result, IObjectUI)> TryLoadUiPanelAsync(string packId)
+        public async Task<(bool result, IObjectUI panelUi)> TryLoadUiPanelAsync(string packId)
         {
             if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return (false, null);
 

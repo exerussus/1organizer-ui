@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Exerussus._1Extensions.Abstractions;
+using Exerussus._1OrganizerUI.Scripts.Ui;
 using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine.AddressableAssets;
 
@@ -10,6 +11,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     {
         public Task InitializeAsync();
         public List<IAssetReferencePack> GetPacksByType(string type);
+        public Task<(bool result, IObjectUI panelUi)> TryLoadUiPanelAsync(string packId);
+        public void UnloadUiPanel(string packId);
+        public List<PanelUiPack> GetAllPanelUiPacks();
         public IAssetReferencePack GetPack(string id);
         public bool TryGetPack(string id, out IAssetReferencePack assetReferencePack);
         public Task<T> LoadAssetPackAsync<T>(string packId) where T : UnityEngine.Object;
