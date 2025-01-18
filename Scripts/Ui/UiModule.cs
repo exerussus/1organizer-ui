@@ -89,7 +89,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 Object.Destroy(_loadedInstance);
                 _loadedInstance = null;
-                _assetProvider.UnloadAssetPack(Name);
+                if (_initedByAssetProvider) _assetProvider.UnloadUiPanel(Name);
+                else _assetProvider.UnloadAssetPack(Name);
             }
         }
 
