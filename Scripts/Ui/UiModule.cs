@@ -20,6 +20,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         private GameShare _mSharedData;
         public GameObject LoadedInstance => _loadedInstance;
         private bool _isLoading;
+        private bool _initedByAssetProvider;
         
         public bool IsActivated { get; private set; }
 
@@ -64,7 +65,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = await _assetProvider.TryLoadAssetPackAsync<GameObject>(Name);
+           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackAsync<GameObject>(Name);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);

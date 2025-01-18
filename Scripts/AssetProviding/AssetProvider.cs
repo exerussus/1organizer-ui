@@ -100,13 +100,13 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             IsLoaded = true;
         }
 
-        public async Task<(bool result, IObjectUI panelUi)> TryLoadUiPanelAsync(string packId)
+        public async Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId)
         {
             if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return (false, null);
 
             var uiObject = await panelUiPack.reference.LoadAssetAsync<GameObject>().Task;
 
-            if (uiObject != null) return (true, uiObject.GetComponent<IObjectUI>());
+            if (uiObject != null) return (true, uiObject);
             return (false, null);
         }
 
