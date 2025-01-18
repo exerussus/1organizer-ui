@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Exerussus._1OrganizerUI.Scripts.Ui;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -22,6 +23,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         protected Dictionary<string, IAssetReferencePack> _assetPacks = new();
         protected Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
         protected Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
+        protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
         protected Dictionary<string, int> _assetPackReferenceCounts = new();
         protected Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
         public List<GroupReferencePack> Groups => groups;
@@ -56,7 +58,15 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                     {
                         groups.Add(group);
                         Debug.Log($"CyberAssets | Group loaded : {group.name}");
-                        foreach (var assetPack in group.AssetPacks) if (assetPack.AssetType == AssetConstants.VfxPack) _vfxPacksDict[assetPack.Id] = assetPack;
+                        foreach (var assetPack in group.AssetPacks)
+                        {
+                            if (assetPack.AssetType == AssetConstants.VfxPack) _vfxPacksDict[assetPack.Id] = assetPack;
+                            else if (assetPack.AssetType == AssetConstants.UiPanel)
+                            {
+                                var pack = await LoadAssetPackAsync<PanelUiPack>(assetPack.Id);
+                                if (pack != null) _uiPanelsDict[assetPack.Id] = pack;
+                            }
+                        }
                     }
                     else Debug.LogWarning($"Duplicate GroupReference loaded: {group.name}");
                 }
@@ -87,6 +97,28 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             Debug.Log("AssetManager initialization completed.");
             IsLoaded = true;
+        }
+
+        public async Task<(bool result, IObjectUI)> TryLoadUiPanelAsync(string packId)
+        {
+            if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return (false, null);
+
+            var uiObject = await panelUiPack.reference.LoadAssetAsync<GameObject>().Task;
+
+            if (uiObject != null) return (true, uiObject.GetComponent<IObjectUI>());
+            return (false, null);
+        }
+
+        public void UnloadUiPanel(string packId)
+        {
+            if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return;
+            
+            Addressables.Release(panelUiPack.reference);
+        }
+        
+        public List<PanelUiPack> GetAllPanelUiPacks()
+        {
+            return _uiPanelsDict.Values.ToList();
         }
         
         public List<IAssetReferencePack> GetPacksByType(string type)
@@ -303,6 +335,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _assetPackReferenceCounts.Clear();
             _assetPackHandles.Clear();
             _vfxPacksDict.Clear();
+            _uiPanelsDict.Clear();
             _loadedHandles.Clear();
             IsLoaded = false;
         }
