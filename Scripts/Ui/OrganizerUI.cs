@@ -138,6 +138,21 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
+        public void ShowModule(string uiName, Action<GameObject> onLoad = null)
+        {
+            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            {
+                if (_enabledModules.Contains(uiName))
+                {
+                    uiModule.UpdateModule();
+                    return;
+                }
+                
+                MoveToEnabledList(uiModule.Name);
+                uiModule.Show(shareData, _parentTransform, onLoad);
+            }
+        }
+
         public void HideModule(string uiName)
         {
             if (_disabledModules.Contains(uiName)) return;

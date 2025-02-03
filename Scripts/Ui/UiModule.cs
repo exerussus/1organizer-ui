@@ -53,6 +53,19 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
         
+        public virtual void Show(GameShare shareData, Transform transform, Action<GameObject> onLoad = null)
+        {
+            if (IsActivated) UIObject.UpdateObject();
+            
+            if (UIObject == null) Load(shareData, transform, onLoad);
+            
+            if (UIObject != null)
+            {
+                IsActivated = true;
+                UIObject.Activate();
+            }
+        }
+        
         public virtual void UpdateModule()
         {
             UIObject?.UpdateObject();
@@ -75,6 +88,28 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            UIObject.Initialize(shareData);
            UIObject.Activate();
            onLoad?.Invoke();
+           _mSharedData.GetSharedObject<OrganizerActions>().Sorting.Invoke();
+           IsActivated = true;
+           _isLoading = false;
+        }
+
+        public virtual async void Load(GameShare shareData, Transform transform, Action<GameObject> onLoad)
+        {
+            if (_isLoading) return;
+            _mSharedData = shareData;
+           _parent = transform;
+           _isLoading = true;
+           
+           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackAsync<GameObject>(Name);
+           if (!result) return;
+           
+           _loadedInstance = Object.Instantiate(asset, _parent);
+
+           if (_loadedInstance == null) return;
+           UIObject = _loadedInstance.GetComponent<IObjectUI>();
+           UIObject.Initialize(shareData);
+           UIObject.Activate();
+           onLoad?.Invoke(_loadedInstance);
            _mSharedData.GetSharedObject<OrganizerActions>().Sorting.Invoke();
            IsActivated = true;
            _isLoading = false;
