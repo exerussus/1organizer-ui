@@ -123,7 +123,22 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
-        public void ShowModule(string uiName, Action onLoad = null)
+        public void ShowModule(string uiName)
+        {
+            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            {
+                if (_enabledModules.Contains(uiName))
+                {
+                    uiModule.UpdateModule();
+                    return;
+                }
+                
+                MoveToEnabledList(uiModule.Name);
+                uiModule.Show(shareData, _parentTransform);
+            }
+        }
+
+        public void ShowModule(string uiName, Action onLoad)
         {
             if (_modulesDict.TryGetValue(uiName, out var uiModule))
             {
@@ -138,7 +153,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
-        public void ShowModule(string uiName, Action<GameObject> onLoad = null)
+        public void ShowModule(string uiName, Action<GameObject> onLoad)
         {
             if (_modulesDict.TryGetValue(uiName, out var uiModule))
             {
