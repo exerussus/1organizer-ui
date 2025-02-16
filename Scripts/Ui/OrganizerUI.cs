@@ -33,6 +33,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             set => _parentTransform = value;
         }
 
+        protected virtual GameShare GetGameShare()
+        {
+            return new GameShare();
+        }
+
         public void Start()
         {
             if (autoStart) _ = Initialize();
@@ -41,7 +46,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         public async Task Initialize()
         {
             if (dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
-            shareData = new GameShare();
+            shareData = GetGameShare();
             _modulesDict = new();
             _groupsDict = new();
             shareData.AddSharedObject(typeof(IAssetProvider), AssetProvider);
