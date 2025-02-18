@@ -116,7 +116,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 _disabledModules.Remove(uiName);
                 _enabledModules.Add(uiName);
-                enabledModules = new List<string>(enabledModules);
+                enabledModules = new List<string>(_enabledModules);
                 disabledModules = new List<string>(_disabledModules);
             }
         }
@@ -127,7 +127,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 _enabledModules.Remove(uiName);
                 _disabledModules.Add(uiName);
-                enabledModules = new List<string>(enabledModules);
+                enabledModules = new List<string>(_enabledModules);
                 disabledModules = new List<string>(_disabledModules);
             }
         }
