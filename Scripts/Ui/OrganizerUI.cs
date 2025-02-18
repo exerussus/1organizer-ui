@@ -104,7 +104,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 sortedModules[i].LoadedInstance.transform.SetSiblingIndex(i);
             }
+
+            OnSort();
         }
+        
+        protected virtual void OnSort() {}
         
         private void MoveToEnabledList(string uiName)
         {
