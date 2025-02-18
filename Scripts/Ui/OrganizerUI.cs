@@ -262,6 +262,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
+        public bool IsEnabledModule(string uiName)
+        {
+            return _enabledModules.Contains(uiName);
+        }
+
         protected virtual void PreInitialize() {}
         protected virtual void OnInitialize() {}
         protected abstract void SetShareData(GameShare shareData);
