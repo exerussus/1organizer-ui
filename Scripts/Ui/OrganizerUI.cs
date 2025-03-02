@@ -177,6 +177,21 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
+        public async Task ShowModuleAsync(string uiName)
+        {
+            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            {
+                if (_enabledModules.Contains(uiName))
+                {
+                    uiModule.UpdateModule();
+                    return;
+                }
+                
+                MoveToEnabledList(uiModule.Name);
+                await uiModule.ShowAsync(shareData, _parentTransform);
+            }
+        }
+
         public void HideModule(string uiName)
         {
             if (_disabledModules.Contains(uiName)) return;

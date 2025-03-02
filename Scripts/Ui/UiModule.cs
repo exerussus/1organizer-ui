@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Exerussus._1Extensions.Abstractions;
 using Exerussus._1Extensions.SmallFeatures;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
@@ -44,7 +45,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         {
             if (IsActivated) UIObject.UpdateObject();
             
-            if (UIObject == null) Load(shareData, transform);
+            if (UIObject == null) _ = Load(shareData, transform);
             
             if (UIObject != null)
             {
@@ -79,12 +80,25 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
         
+        public virtual async Task ShowAsync(GameShare shareData, Transform transform)
+        {
+            if (IsActivated) UIObject.UpdateObject();
+            
+            if (UIObject == null)  await Load(shareData, transform);
+            
+            if (UIObject != null)
+            {
+                IsActivated = true;
+                UIObject.Activate();
+            }
+        }
+        
         public virtual void UpdateModule()
         {
             UIObject?.UpdateObject();
         }
 
-        public virtual async void Load(GameShare shareData, Transform transform)
+        public virtual async Task Load(GameShare shareData, Transform transform)
         {
             if (_isLoading) return;
             _mSharedData = shareData;
