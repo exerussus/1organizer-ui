@@ -40,59 +40,75 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             IsActivated = false;
             UIObject.Deactivate();
         }
-        
+
         public virtual void Show(GameShare shareData, Transform transform)
         {
-            if (IsActivated) UIObject.UpdateObject();
-            
             if (UIObject == null) _ = Load(shareData, transform);
-            
+
             if (UIObject != null)
             {
+                if (IsActivated)
+                {
+                    UIObject.UpdateObject();
+                    return;
+                }
+
                 IsActivated = true;
                 UIObject.Activate();
             }
         }
-        
+
         public virtual void Show(GameShare shareData, Transform transform, Action onLoad)
         {
-            if (IsActivated) UIObject.UpdateObject();
-            
             if (UIObject == null) Load(shareData, transform, onLoad);
-            
+
             if (UIObject != null)
             {
+                if (IsActivated)
+                {
+                    UIObject.UpdateObject();
+                    return;
+                }
+
                 IsActivated = true;
                 UIObject.Activate();
             }
         }
-        
+
         public virtual void Show(GameShare shareData, Transform transform, Action<GameObject> onLoad)
         {
-            if (IsActivated) UIObject.UpdateObject();
-            
             if (UIObject == null) Load(shareData, transform, onLoad);
-            
+
             if (UIObject != null)
             {
+                if (IsActivated)
+                {
+                    UIObject.UpdateObject();
+                    return;
+                }
+
                 IsActivated = true;
                 UIObject.Activate();
             }
         }
-        
+
         public virtual async Task ShowAsync(GameShare shareData, Transform transform)
         {
-            if (IsActivated) UIObject.UpdateObject();
-            
-            if (UIObject == null)  await Load(shareData, transform);
-            
+            if (UIObject == null) await Load(shareData, transform);
+
             if (UIObject != null)
             {
+                if (IsActivated)
+                {
+                    UIObject.UpdateObject();
+                    return;
+                }
+
                 IsActivated = true;
                 UIObject.Activate();
             }
         }
-        
+
         public virtual void UpdateModule()
         {
             UIObject?.UpdateObject();
