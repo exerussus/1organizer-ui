@@ -69,6 +69,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                     handle.order = panelUiPack.order;
                     handle.initedByAssetProvider = true;
                     modules.Add(newModule);
+                    OnPanelUiPackApply(handle, panelUiPack);
                 }
             }
 
@@ -91,6 +92,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 if (_enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, _parentTransform);
                 else _disabledModules.Add(uiModule.Name);
             }
+        }
+
+        protected virtual void OnPanelUiPackApply(UiModule.UiModuleHandle moduleHandle, PanelUiPack panelUiPack)
+        {
+            
         }
         
         private void Sort()
