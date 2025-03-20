@@ -104,7 +104,26 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return (false, null);
 
-            var uiObject = await panelUiPack.reference.LoadAssetAsync<GameObject>().Task;
+            GameObject uiObject = null;
+            
+            if (panelUiPack.reference.Asset != null)
+            {
+                uiObject = panelUiPack.reference.Asset as GameObject;
+            }
+            else
+            {
+                var handle = panelUiPack.reference.LoadAssetAsync<GameObject>();
+                await handle.Task;
+
+                if (handle.Status == AsyncOperationStatus.Succeeded)
+                {
+                    uiObject = handle.Result as GameObject;
+                }
+                else
+                {
+                    Debug.LogError("Ошибка при загрузке ассета: " + handle.OperationException);
+                }
+            }
 
             if (uiObject != null) return (true, uiObject);
             return (false, null);
