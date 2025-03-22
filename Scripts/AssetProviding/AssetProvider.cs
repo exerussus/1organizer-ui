@@ -133,7 +133,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return;
             
-            Addressables.Release(panelUiPack.reference);
+            if (panelUiPack.reference != null)
+            {
+                panelUiPack.reference.ReleaseAsset();
+                panelUiPack.reference = null;
+            }
         }
         
         public List<PanelUiPack> GetAllPanelUiPacks()
