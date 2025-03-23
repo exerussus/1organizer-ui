@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Exerussus._1Extensions.Async;
+using Exerussus._1Extensions.SignalSystem;
 using Exerussus._1Extensions.SmallFeatures;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine;
@@ -26,6 +27,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         private Dictionary<string, List<TModule>> _groupsDict;
 
         public abstract IAssetProvider AssetProvider { get; }
+        public abstract JobHandler JobHandler { get; }
 
         public Transform ParentTransform
         {
@@ -75,7 +77,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
             foreach (var uiModule in modules) uiModule.Inject(shareData);
             
-            PreInitialize();
+            await JobHandler.AddJobAsync(PreInitialize, "OrganizerUI.PreInitialize");
             
             foreach (var uiModule in modules)
             {
@@ -85,11 +87,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 else _groupsDict.Add(uiModule.Group, new List<TModule> { uiModule });
             }
 
-            OnInitialize();
+            await JobHandler.AddJobAsync(OnInitialize, "OrganizerUI.OnInitialize");
             
             foreach (var uiModule in modules)
             {
-                if (_enabledModules.Contains(uiModule.Name)) uiModule.Show(shareData, _parentTransform);
+                if (_enabledModules.Contains(uiModule.Name)) _ =  uiModule.ShowAsync(shareData, _parentTransform);
                 else _disabledModules.Add(uiModule.Name);
             }
         }
