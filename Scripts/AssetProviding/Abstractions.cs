@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Exerussus._1Extensions.Abstractions;
-using Exerussus._1OrganizerUI.Scripts.Ui;
 using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
+    /// <summary> Главный менеджер ассетов, управляющий загрузкой\выгрузкой через Addressable. </summary>
     public interface IAssetProvider : IInitializable
     {
         public Task InitializeAsync();
@@ -26,14 +26,20 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public bool IsLoaded { get; }
     }
     
+    /// <summary> Пакет с мета-информацией об ассете и ссылкой на него. </summary>
     public interface IAssetReferencePack
     {
+        /// <summary> Уникальный ID ассета. Может быть отличным от id в Reference. </summary>
         public string Id { get; set; }
+        /// <summary> Тип ассета для группирования. </summary>
         public string AssetType { get; set; }
+        /// <summary> Ссылка на ассет. </summary>
         public AssetReference Reference { get; set; }
+        /// <summary> Тэги для фильтрации. </summary>
         public List<string> Tags { get; set; }
     }
 
+    /// <summary> Пакет с мета-информацией об ассете и ссылкой на него. </summary>
     public interface IGroupReferencePack
     {
         public List<AssetReferencePack> AssetPacks { get; set; }

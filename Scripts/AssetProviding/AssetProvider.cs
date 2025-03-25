@@ -11,21 +11,25 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
     [CreateAssetMenu(menuName = "Exerussus/AssetProviding/AssetProvider", fileName = "AssetProvider")]
-    public class AssetProvider : SerializedScriptableObject, IAssetProvider
+    public class AssetProvider : ScriptableObject, IAssetProvider
     {
+        /// <summary> Хранит все активные группы, которые будут загружаться при инициализации. </summary>
         [SerializeField] protected List<AssetReferenceT<GroupReferencePack>> groupReferences;
 #if UNITY_EDITOR
+        /// <summary> Хранит деактивированные группы, которые можно подключить через Inspector. </summary>
         [SerializeField] protected List<AssetReferenceT<GroupReferencePack>> unusedGroupReferences = new();
 #endif
+        /// <summary> Проинициализированные группы. </summary>
         [SerializeField, ReadOnly] protected List<GroupReferencePack> groups = new();
         
         protected Dictionary<string, IAssetReferencePack> _vfxPacksDict = new();
         protected Dictionary<string, IAssetReferencePack> _assetPacks = new();
+        protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
         protected Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
         protected Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
-        protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
         protected Dictionary<string, int> _assetPackReferenceCounts = new();
         protected Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
+        protected Dictionary<AssetReference, AsyncOperationHandle<GameObject>> _loadedPanelHandles = new();
         public List<GroupReferencePack> Groups => groups;
         public bool IsLoaded { get; private set; }
         
@@ -102,44 +106,35 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         public async Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId)
         {
-            if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return (false, null);
-
-            GameObject uiObject = null;
-            
-            if (panelUiPack.reference.Asset != null)
+            if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) 
+                return (false, null);
+    
+            if (!_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
             {
-                uiObject = panelUiPack.reference.Asset as GameObject;
+                handle = panelUiPack.reference.LoadAssetAsync<GameObject>();
+                _loadedPanelHandles[panelUiPack.reference] = handle;
             }
-            else
+    
+            if (handle.IsDone)
             {
-                var handle = panelUiPack.reference.LoadAssetAsync<GameObject>();
-                await handle.Task;
-
-                if (handle.Status == AsyncOperationStatus.Succeeded)
-                {
-                    uiObject = handle.Result as GameObject;
-                }
-                else
-                {
-                    Debug.LogError("Ошибка при загрузке ассета: " + handle.OperationException);
-                }
+                return (true, handle.Result);
             }
-
-            if (uiObject != null) return (true, uiObject);
-            return (false, null);
+    
+            var panelUi = await handle.Task;
+            return (panelUi != null, panelUi);
         }
-
+        
         public void UnloadUiPanel(string packId)
         {
             if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return;
-            
-            if (panelUiPack.reference != null)
+    
+            if (_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
             {
-                panelUiPack.reference.ReleaseAsset();
-                panelUiPack.reference = null;
+                if (handle.IsValid()) Addressables.Release(handle);
+                _loadedPanelHandles.Remove(panelUiPack.reference);
             }
         }
-        
+            
         public List<PanelUiPack> GetAllPanelUiPacks()
         {
             return _uiPanelsDict.Values.ToList();
