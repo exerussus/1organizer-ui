@@ -44,5 +44,27 @@ namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
             instance = _handlers[referencePack.AssetType](referencePack);
             return true;
         }
+        
+        
+
+#if UNITY_EDITOR
+
+        [UnityEditor.InitializeOnLoad]
+        public static class StaticCleaner
+        {
+            static StaticCleaner()
+            {
+                UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            }
+
+            private static void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange state)
+            {
+                if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode || state == UnityEditor.PlayModeStateChange.ExitingEditMode)
+                {
+                    _handlers = new();
+                }
+            }
+        }
+#endif
     }
 }
