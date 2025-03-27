@@ -19,7 +19,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public bool TryGetPack(string id, out IAssetReferencePack assetReferencePack);
         public Task<T> LoadAssetPackAsync<T>(string packId) where T : UnityEngine.Object;
         public Task<(bool result, VfxPack vfxPack)> TryLoadVfxPackAsync(string packId);
-        public Task<(bool result, T asset)> TryLoadAssetPackAsync<T>(string packId) where T : UnityEngine.Object;
+        public Task<(bool result, T asset)> TryLoadAssetPackContentAsync<T>(string packId) where T : UnityEngine.Object;
         public void UnloadAssetPack(string packId);        
         public void OnBeforeInitialize() {}
         public void OnInitialize() {}

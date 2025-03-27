@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
 {
     /// <summary> Обертка, которая содержит визуальный контент. </summary>
-    public interface IContentHandler
+    public interface IContentHandle
     {
         /// <summary> Тип ассета, с которым работает обертка. </summary>
         public string AssetType { get; }
@@ -18,6 +18,7 @@ namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
         public GameObject Parent { get; protected set; }
         /// <summary> Ссылка на загружаемый ассет. </summary>
         public AssetReferencePack AssetReferencePack { get; protected set; }
+        public Action Dispose { get; }
 
         /// <summary> Ассинхронно загружаем ассет. </summary>
         public virtual async Task LoadAsset(AssetReferencePack referencePack)

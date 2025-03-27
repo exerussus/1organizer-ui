@@ -1,67 +1,54 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
-using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
 {
     public static class AssetContentRecognizer
     {
-        private static Dictionary<string, Func<IAssetReferencePack, IContentHandler>> _handlers = new ();
-        private static AssetProvider _assetProvider;
+        private static Dictionary<string, IHandleManager> _handlers = new ();
+        private static Dictionary<string, IHandleManager> _packIdToHandleManager = new ();
         
-        public static void InitRecognizer(AssetProvider assetProvider)
-        {
-            _assetProvider = assetProvider;
-        }
-        
-        public static void InitHandler(string assetType, Func<IAssetReferencePack, IContentHandler> creatingMethod)
+        public static void InitHandler(string assetType, IHandleManager handleManager)
         {
             if (string.IsNullOrEmpty(assetType))
             {
                 Debug.LogError("AssetContentRecognizer.InitHandler | AssetType is null or empty.");
                 return;
             }
-            if (!_handlers.TryAdd(assetType, creatingMethod))
+            
+            if (!_handlers.TryAdd(assetType, handleManager))
             {
                 Debug.LogError($"AssetContentRecognizer.InitHandler | AssetType {assetType} already exists.");
             }
         }
 
-        public static IContentHandler GetHandle(string assetPackId)
+        public static IContentHandle GetHandle(string assetPackId)
         {
-            if (!_assetProvider.TryGetPack(assetPackId, out var referencePack))
+            if (!_packIdToHandleManager.TryGetValue(assetPackId, out var manager))
             {
-                Debug.LogError($"AssetContentRecognizer.GetHandle | AssetPack {assetPackId} not found.");
-                return null;
+                foreach (var (assetType, handleManager) in _handlers)
+                {
+                    if (!handleManager.ContainsAssetPackId(assetPackId)) continue;
+                    _packIdToHandleManager[assetPackId] = handleManager;
+                    manager = handleManager;
+                    break;
+                }
+
+                if (manager == null)
+                {
+                    Debug.LogError($"AssetContentRecognizer.GetHandle | AssetPack {assetPackId} not found.");
+                    return null;
+                }
             }
             
-            if (!_handlers.ContainsKey(referencePack.AssetType))
-            {
-                Debug.LogError($"AssetContentRecognizer.GetHandle | AssetType {referencePack.AssetType} not found.");
-                return null;
-            }
-            
-            return _handlers[referencePack.AssetType](referencePack);
+            return manager.CreateHandle(assetPackId);
         }
 
-        public static bool TryGetHandle(string assetPackId, out IContentHandler instance)
+        public static bool TryGetHandle(string assetPackId, out IContentHandle handle)
         {
-            
-            if (!_assetProvider.TryGetPack(assetPackId, out var referencePack))
-            {
-                instance = null;
-                return false;
-            }
-            
-            if (!_handlers.ContainsKey(referencePack.AssetType))
-            {
-                instance = null;
-                return false;
-            }
-            
-            instance = _handlers[referencePack.AssetType](referencePack);
-            return true;
+            handle = GetHandle(assetPackId);
+            return handle != null;
         }
         
         
@@ -81,7 +68,7 @@ namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
                 if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode || state == UnityEditor.PlayModeStateChange.ExitingEditMode)
                 {
                     _handlers = new();
-                    _assetProvider = null;
+                    _packIdToHandleManager = new();
                 }
             }
         }

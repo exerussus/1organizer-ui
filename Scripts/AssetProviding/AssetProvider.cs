@@ -227,7 +227,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return (false, null);
         }
         
-        public async Task<(bool, T)> TryLoadAssetPackAsync<T>(string packId, Action<string, LogType> messageCallback) where T : UnityEngine.Object
+        public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(string packId, Action<string, LogType> messageCallback) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
@@ -266,8 +266,27 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _assetPackReferenceCounts.Remove(packId);
             return (false, null);
         }
+
+        public bool TryGetAssetPack<T>(string packId, out T resultPack) where T : IAssetReferencePack
+        {
+            if (!_assetPacks.TryGetValue(packId, out var rawPack))
+            {
+                resultPack = default;
+                return false;
+            }
+            
+            if (rawPack is not T pack)
+            {
+                resultPack = default;
+                return false;
+            }
+            
+            resultPack = pack;
+            
+            return true;
+        }  
         
-        public async Task<(bool, T)> TryLoadAssetPackAsync<T>(string packId) where T : UnityEngine.Object
+        public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(string packId) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {

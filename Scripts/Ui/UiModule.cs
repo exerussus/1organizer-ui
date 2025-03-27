@@ -121,7 +121,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackAsync<GameObject>(Name);
+           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
@@ -142,7 +142,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackAsync<GameObject>(Name);
+           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
@@ -164,7 +164,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackAsync<GameObject>(Name);
+           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
