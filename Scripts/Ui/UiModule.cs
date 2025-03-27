@@ -11,11 +11,12 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
     [Serializable]
     public abstract class UiModule : IInjectable
     {
-        public string Name { get => _panelUiMetaInfo.name; protected set => _panelUiMetaInfo.name = value; }
+        public string Name => _assetReferencePack.Id;
         public string Group { get => _panelUiMetaInfo.group; protected set => _panelUiMetaInfo.group = value; }
         public int Order { get => _panelUiMetaInfo.order; protected set => _panelUiMetaInfo.order = value; }
         public IObjectUI UIObject { get; private set; }
         private PanelUiMetaInfo _panelUiMetaInfo;
+        private IAssetReferencePack _assetReferencePack;
         private IAssetProvider _assetProvider;
         private Transform _parent;
         private GameObject _loadedInstance;
@@ -205,6 +206,12 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 get => uiModule._panelUiMetaInfo;
                 set => uiModule._panelUiMetaInfo = value;
+            }
+
+            public IAssetReferencePack assetReferencePack
+            {
+                get => uiModule._assetReferencePack;
+                set => uiModule._assetReferencePack = value;
             }
         }
     }

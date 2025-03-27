@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Exerussus._1Extensions.Async;
-using Exerussus._1Extensions.SignalSystem;
 using Exerussus._1Extensions.SmallFeatures;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine;
@@ -69,7 +68,9 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                     var newModule = new TModule();
                     var handle = new UiModule.UiModuleHandle(newModule);
                     handle.panelUiMetaInfo = metaInfo;
+                    handle.assetReferencePack = panelUiPack;
                     modules.Add(newModule);
+                    _modulesDict[panelUiPack.Id] = newModule;
                     OnPanelUiPackApply(handle, panelUiPack, metaInfo);
                 }
             }
