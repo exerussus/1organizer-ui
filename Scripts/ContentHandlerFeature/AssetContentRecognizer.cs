@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
@@ -23,7 +24,7 @@ namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
             }
         }
 
-        public static IContentHandle GetHandle(string assetPackId)
+        public static async Task<IContentHandle> GetHandle(string assetPackId)
         {
             if (!_packIdToHandleManager.TryGetValue(assetPackId, out var manager))
             {
@@ -42,15 +43,14 @@ namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
                 }
             }
             
-            return manager.CreateHandle(assetPackId);
+            return await manager.CreateHandle(assetPackId);
         }
 
-        public static bool TryGetHandle(string assetPackId, out IContentHandle handle)
+        public static async Task<(bool result, IContentHandle handle)> TryGetHandle(string assetPackId)
         {
-            handle = GetHandle(assetPackId);
-            return handle != null;
+            var handle = await GetHandle(assetPackId);
+            return (handle != null, handle);
         }
-        
         
 
 #if UNITY_EDITOR

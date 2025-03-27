@@ -267,23 +267,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return (false, null);
         }
 
-        public bool TryGetAssetPack<T>(string packId, out T resultPack) where T : IAssetReferencePack
+        public bool TryGetAssetPack(string packId, out IAssetReferencePack resultPack)
         {
-            if (!_assetPacks.TryGetValue(packId, out var rawPack))
-            {
-                resultPack = default;
-                return false;
-            }
-            
-            if (rawPack is not T pack)
-            {
-                resultPack = default;
-                return false;
-            }
-            
-            resultPack = pack;
-            
-            return true;
+            return _assetPacks.TryGetValue(packId, out resultPack);
         }  
         
         public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(string packId) where T : UnityEngine.Object

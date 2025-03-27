@@ -37,6 +37,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public AssetReference Reference { get; set; }
         /// <summary> Тэги для фильтрации. </summary>
         public List<string> Tags { get; set; }
+
+        public bool TryGetMetaInfo<T>(out T info) where T : ScriptableObject;
     }
 
     /// <summary> Пакет с мета-информацией об ассете и ссылкой на него. </summary>
