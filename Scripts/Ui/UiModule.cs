@@ -11,17 +11,17 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
     [Serializable]
     public abstract class UiModule : IInjectable
     {
-        public abstract string Name { get; protected set; }
-        public abstract string Group { get; protected set; }
-        public abstract int Order { get; protected set; }
+        public string Name { get => _panelUiMetaInfo.name; protected set => _panelUiMetaInfo.name = value; }
+        public string Group { get => _panelUiMetaInfo.group; protected set => _panelUiMetaInfo.group = value; }
+        public int Order { get => _panelUiMetaInfo.order; protected set => _panelUiMetaInfo.order = value; }
         public IObjectUI UIObject { get; private set; }
+        private PanelUiMetaInfo _panelUiMetaInfo;
         private IAssetProvider _assetProvider;
         private Transform _parent;
         private GameObject _loadedInstance;
         private GameShare _mSharedData;
         public GameObject LoadedInstance => _loadedInstance;
         private bool _isLoading;
-        private bool _initedByAssetProvider;
         
         public bool IsActivated { get; private set; }
 
@@ -121,7 +121,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
+           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
@@ -142,7 +142,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
+           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
@@ -164,7 +164,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = _initedByAssetProvider ? await _assetProvider.TryLoadUiPanelAsync(Name) : await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
+           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
@@ -188,8 +188,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 Object.Destroy(_loadedInstance);
                 _loadedInstance = null;
-                if (_initedByAssetProvider) _assetProvider.UnloadUiPanel(Name);
-                else _assetProvider.UnloadAssetPack(Name);
+                _assetProvider.UnloadAssetPack(Name);
             }
         }
 
@@ -201,29 +200,11 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
 
             public UiModule uiModule;
-            
-            public string name
+
+            public PanelUiMetaInfo panelUiMetaInfo
             {
-                get => uiModule.Name;
-                set => uiModule.Name = value;
-            }
-            
-            public string group
-            {
-                get => uiModule.Group;
-                set => uiModule.Group = value;
-            }
-            
-            public int order
-            {
-                get => uiModule.Order;
-                set => uiModule.Order = value;
-            }
-            
-            public bool initedByAssetProvider
-            {
-                get => uiModule._initedByAssetProvider;
-                set => uiModule._initedByAssetProvider = value;
+                get => uiModule._panelUiMetaInfo;
+                set => uiModule._panelUiMetaInfo = value;
             }
         }
     }

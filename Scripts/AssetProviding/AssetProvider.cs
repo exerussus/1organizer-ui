@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Exerussus._1OrganizerUI.Scripts.Ui;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -24,7 +23,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         protected Dictionary<string, IAssetReferencePack> _vfxPacksDict = new();
         protected Dictionary<string, IAssetReferencePack> _assetPacks = new();
-        protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
+        //protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
         protected Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
         protected Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
         protected Dictionary<string, int> _assetPackReferenceCounts = new();
@@ -92,11 +91,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                     }
                     else dict.Add(assetReferencePack.Id, group);
                     
-                    if (assetReferencePack.AssetType == AssetConstants.UiPanel)
-                    {
-                        var pack = await LoadAssetPackAsync<PanelUiPack>(assetReferencePack.Id);
-                        if (pack != null) _uiPanelsDict[assetReferencePack.Id] = pack;
-                    }
+                    // if (assetReferencePack.AssetType == AssetConstants.UiPanel)
+                    // {
+                    //     var pack = await LoadAssetPackAsync<PanelUiPack>(assetReferencePack.Id);
+                    //     if (pack != null) _uiPanelsDict[assetReferencePack.Id] = pack;
+                    // }
                 }
             }
 
@@ -104,41 +103,41 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             IsLoaded = true;
         }
 
-        public async Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId)
-        {
-            if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) 
-                return (false, null);
-    
-            if (!_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
-            {
-                handle = panelUiPack.reference.LoadAssetAsync<GameObject>();
-                _loadedPanelHandles[panelUiPack.reference] = handle;
-            }
-    
-            if (handle.IsDone)
-            {
-                return (true, handle.Result);
-            }
-    
-            var panelUi = await handle.Task;
-            return (panelUi != null, panelUi);
-        }
-        
-        public void UnloadUiPanel(string packId)
-        {
-            if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return;
-    
-            if (_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
-            {
-                if (handle.IsValid()) Addressables.Release(handle);
-                _loadedPanelHandles.Remove(panelUiPack.reference);
-            }
-        }
+        // public async Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId)
+        // {
+        //     if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) 
+        //         return (false, null);
+        //
+        //     if (!_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
+        //     {
+        //         handle = panelUiPack.reference.LoadAssetAsync<GameObject>();
+        //         _loadedPanelHandles[panelUiPack.reference] = handle;
+        //     }
+        //
+        //     if (handle.IsDone)
+        //     {
+        //         return (true, handle.Result);
+        //     }
+        //
+        //     var panelUi = await handle.Task;
+        //     return (panelUi != null, panelUi);
+        // }
+        //
+        // public void UnloadUiPanel(string packId)
+        // {
+        //     if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return;
+        //
+        //     if (_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
+        //     {
+        //         if (handle.IsValid()) Addressables.Release(handle);
+        //         _loadedPanelHandles.Remove(panelUiPack.reference);
+        //     }
+        // }
             
-        public List<PanelUiPack> GetAllPanelUiPacks()
-        {
-            return _uiPanelsDict.Values.ToList();
-        }
+        // public List<PanelUiPack> GetAllPanelUiPacks()
+        // {
+        //     return _uiPanelsDict.Values.ToList();
+        // }
         
         public List<IAssetReferencePack> GetPacksByType(string type)
         {
@@ -359,7 +358,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _assetPackReferenceCounts.Clear();
             _assetPackHandles.Clear();
             _vfxPacksDict.Clear();
-            _uiPanelsDict.Clear();
+            //_uiPanelsDict.Clear();
             _loadedHandles.Clear();
             IsLoaded = false;
         }

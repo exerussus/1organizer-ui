@@ -59,19 +59,18 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
             await TaskUtils.WaitUntilAsync(() => AssetProvider.IsLoaded);
 
-            var allPacks = AssetProvider.GetAllPanelUiPacks();
+            var allPacks = AssetProvider.GetPacksByType(AssetProviding.AssetConstants.UiPanel);
             if (allPacks.Count > 0)
             {
                 foreach (var panelUiPack in allPacks)
                 {
+                    if (!panelUiPack.TryGetMetaInfo(out PanelUiMetaInfo metaInfo)) continue;
+                    
                     var newModule = new TModule();
                     var handle = new UiModule.UiModuleHandle(newModule);
-                    handle.name = panelUiPack.id;
-                    handle.group = panelUiPack.group;
-                    handle.order = panelUiPack.order;
-                    handle.initedByAssetProvider = true;
+                    handle.panelUiMetaInfo = metaInfo;
                     modules.Add(newModule);
-                    OnPanelUiPackApply(handle, panelUiPack);
+                    OnPanelUiPackApply(handle, panelUiPack, metaInfo);
                 }
             }
 
@@ -96,7 +95,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
-        protected virtual void OnPanelUiPackApply(UiModule.UiModuleHandle moduleHandle, PanelUiPack panelUiPack)
+        protected virtual void OnPanelUiPackApply(UiModule.UiModuleHandle moduleHandle, IAssetReferencePack pack, PanelUiMetaInfo metaInfo)
         {
             
         }

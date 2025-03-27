@@ -12,9 +12,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     {
         public Task InitializeAsync();
         public List<IAssetReferencePack> GetPacksByType(string type);
-        public Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId);
-        public void UnloadUiPanel(string packId);
-        public List<PanelUiPack> GetAllPanelUiPacks();
+        //public Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId);
+        //public void UnloadUiPanel(string packId);
+        //public List<PanelUiPack> GetAllPanelUiPacks();
         public IAssetReferencePack GetPack(string id);
         public bool TryGetPack(string id, out IAssetReferencePack assetReferencePack);
         public Task<T> LoadAssetPackAsync<T>(string packId) where T : UnityEngine.Object;
