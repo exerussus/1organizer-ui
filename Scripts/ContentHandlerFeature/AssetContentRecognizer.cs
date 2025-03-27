@@ -8,6 +8,12 @@ namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
     public static class AssetContentRecognizer
     {
         private static Dictionary<string, Func<IAssetReferencePack, IContentHandler>> _handlers = new ();
+        private static AssetProvider _assetProvider;
+        
+        public static void InitRecognizer(AssetProvider assetProvider)
+        {
+            _assetProvider = assetProvider;
+        }
         
         public static void InitHandler(string assetType, Func<IAssetReferencePack, IContentHandler> creatingMethod)
         {
@@ -22,19 +28,32 @@ namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
             }
         }
 
-        public static IContentHandler GetInstance(IAssetReferencePack referencePack)
+        public static IContentHandler GetHandle(string assetPackId)
         {
+            if (!_assetProvider.TryGetPack(assetPackId, out var referencePack))
+            {
+                Debug.LogError($"AssetContentRecognizer.GetHandle | AssetPack {assetPackId} not found.");
+                return null;
+            }
+            
             if (!_handlers.ContainsKey(referencePack.AssetType))
             {
-                Debug.LogError($"AssetContentRecognizer.GetInstance | AssetType {referencePack.AssetType} not found.");
+                Debug.LogError($"AssetContentRecognizer.GetHandle | AssetType {referencePack.AssetType} not found.");
                 return null;
             }
             
             return _handlers[referencePack.AssetType](referencePack);
         }
 
-        public static bool TryGetInstance(IAssetReferencePack referencePack, out IContentHandler instance)
+        public static bool TryGetHandle(string assetPackId, out IContentHandler instance)
         {
+            
+            if (!_assetProvider.TryGetPack(assetPackId, out var referencePack))
+            {
+                instance = null;
+                return false;
+            }
+            
             if (!_handlers.ContainsKey(referencePack.AssetType))
             {
                 instance = null;
@@ -62,6 +81,7 @@ namespace Exerussus._1OrganizerUI.Scripts.ContentHandlerFeature
                 if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode || state == UnityEditor.PlayModeStateChange.ExitingEditMode)
                 {
                     _handlers = new();
+                    _assetProvider = null;
                 }
             }
         }
