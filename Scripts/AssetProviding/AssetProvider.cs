@@ -368,6 +368,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         public async void Initialize()
         {
+            Instance = this;
             OnBeforeInitialize();
             await InitializeAsync();
             OnInitialize();
