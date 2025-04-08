@@ -32,9 +32,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public List<GroupReferencePack> Groups => groups;
         public bool IsLoaded { get; private set; }
         
+        public static AssetProvider Instance { get; private set; }
+        
         public async Task InitializeAsync()
         {
-            Clear(); 
+            Clear();
+            Instance = this;
             var handles = new List<AsyncOperationHandle<GroupReferencePack>>();
             var taskArray = new Task<GroupReferencePack>[groupReferences.Count];
 
@@ -453,6 +456,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             {
                 if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode || state == UnityEditor.PlayModeStateChange.ExitingEditMode)
                 {
+                    Instance = null;
+                    
                     string[] assetGuids = UnityEditor.AssetDatabase.FindAssets("t:AssetProvider");
                     List<AssetProvider> assets = new List<AssetProvider>();
 
