@@ -11,7 +11,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private bool _isLoadingProcessStarted;
 
         public string Id { get; private set; }
-        public bool IsValid { get; set; } = true;
+        public bool IsValid { get; private set; }
 
         public async Task<(bool result, T asset)> Load(string id)
         {
@@ -55,6 +55,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         public void Dispose()
         {
+            IsValid = false;
             TryUnload();
         }
     }
