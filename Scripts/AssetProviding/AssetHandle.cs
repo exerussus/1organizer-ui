@@ -15,6 +15,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         public async Task<(bool result, T asset)> Load(string id)
         {
+            if (!IsValid) return (false, null);
+            if (id == Id && _asset != null) return (_isLoaded, _asset);
+            
             lock (this)
             {
                 if (_isLoadingProcessStarted)
