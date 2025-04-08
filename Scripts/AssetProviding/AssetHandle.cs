@@ -12,13 +12,14 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         public string Id { get; private set; }
         public bool IsValid { get; private set; } = true;
-
+        private readonly object _lock = new();
+        
         public async Task<(bool result, T asset)> Load(string id)
         {
             if (!IsValid) return (false, null);
             if (id == Id && _asset != null) return (_isLoaded, _asset);
             
-            lock (this)
+            lock (_lock)
             {
                 if (_isLoadingProcessStarted)
                 {
@@ -31,18 +32,27 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 Id = id;
                 _isLoadingProcessStarted = true;
             }
-
+            
             (_isLoaded, _asset) = await AssetProvider.Instance.TryLoadAssetPackContentAsync<T>(id);
 
-            if (!IsValid)
+            try
             {
-                TryUnload();
-                lock (this) _isLoadingProcessStarted = false;
-                return (false, null);
-            }
+                if (!IsValid)
+                {
+                    TryUnload();
+                    return (false, null);
+                }
 
-            lock (this) _isLoadingProcessStarted = false;
-            return (_isLoaded, _asset);
+                return (_isLoaded, _asset);
+            }
+            finally
+            {
+                lock (_lock)
+                {
+                    if (!_isLoaded) Id = string.Empty;
+                    _isLoadingProcessStarted = false;
+                }
+            }
         }
 
         public void TryUnload()
