@@ -46,7 +46,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (_isLoaded && _asset != null)
             {
-                UnityEngine.Object.Destroy(_asset);
+                if (_asset is GameObject gameObject) UnityEngine.Object.Destroy(gameObject);
+                _asset = null;
                 _isLoaded = false;
                 AssetProvider.Instance.UnloadAssetPack(Id);
             }
