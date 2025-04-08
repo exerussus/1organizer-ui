@@ -11,7 +11,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private bool _isLoadingProcessStarted;
 
         public string Id { get; private set; }
-        public bool IsValid { get; private set; }
+        public bool IsValid { get; private set; } = true;
 
         public async Task<(bool result, T asset)> Load(string id)
         {
