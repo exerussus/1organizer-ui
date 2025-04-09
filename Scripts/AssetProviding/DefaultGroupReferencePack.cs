@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
     [CreateAssetMenu(menuName = "Exerussus/AssetProviding/GroupReferencePack", fileName = "GroupReferencePack")]
-    public class GroupReferencePack : SerializedScriptableObject, IGroupReferencePack
+    public class DefaultGroupReferencePack : GroupReferencePack
 {
         [SerializeField] private List<AssetReferencePack> assetPacks;
 
@@ -15,6 +15,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             get => assetPacks;
             set => assetPacks = value;
+        }
+        
+        public override void SetAssetReferencePacks(List<AssetReferencePack> references)
+        {
+            foreach (var assetPack in assetPacks) references.Add(assetPack);
         }
         
         public virtual void TypeValidate() { }
@@ -105,7 +110,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (assetPath.EndsWith(".asset"))
             {
-                var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<GroupReferencePack>(assetPath);
+                var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<DefaultGroupReferencePack>(assetPath);
                 if (asset != null)
                 {
                     asset.IsValidEditor = false;
@@ -117,5 +122,5 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         }
     }
 #endif
-    }
+}
 }

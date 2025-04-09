@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Sirenix.OdinInspector;
+using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -21,7 +22,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         /// <summary> Проинициализированные группы. </summary>
         [SerializeField, ReadOnly] protected List<GroupReferencePack> groups = new();
         
-        protected Dictionary<string, IAssetReferencePack> _vfxPacksDict = new();
         protected Dictionary<string, IAssetReferencePack> _assetPacks = new();
         //protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
         protected Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
@@ -60,15 +60,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 if (handle.Status == AsyncOperationStatus.Succeeded)
                 {
                     var group = handle.Result;
-                    if (!groups.Contains(group))
-                    {
-                        groups.Add(group);
-                        Debug.Log($"CyberAssets | Group loaded : {group.name}");
-                        foreach (var assetPack in group.AssetPacks)
-                        {
-                            if (assetPack.AssetType == AssetConstants.VfxPack) _vfxPacksDict[assetPack.Id] = assetPack;
-                        }
-                    }
+                    if (!groups.Contains(group)) groups.Add(group);
                     else Debug.LogWarning($"Duplicate GroupReference loaded: {group.name}");
                 }
                 else Debug.LogError($"Failed to load GroupReference: {groupRef.RuntimeKey}");
@@ -78,7 +70,10 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             foreach (var group in groups)
             {
-                foreach (var assetReferencePack in group.AssetPacks)
+                var tempAssetPacksList = new List<AssetReferencePack>();
+                group.SetAssetReferencePacks(tempAssetPacksList);
+
+                foreach (var assetReferencePack in tempAssetPacksList)
                 {
                     if (!_typePacks.TryGetValue(assetReferencePack.AssetType, out var packList))
                     {
@@ -93,12 +88,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         Debug.LogError($"Already exist AssetPack >>> ping", dict[assetReferencePack.Id]);
                     }
                     else dict.Add(assetReferencePack.Id, group);
-                    
-                    // if (assetReferencePack.AssetType == AssetConstants.UiPanel)
-                    // {
-                    //     var pack = await LoadAssetPackAsync<PanelUiPack>(assetReferencePack.Id);
-                    //     if (pack != null) _uiPanelsDict[assetReferencePack.Id] = pack;
-                    // }
                 }
             }
 
@@ -360,7 +349,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _typePacks.Clear();
             _assetPackReferenceCounts.Clear();
             _assetPackHandles.Clear();
-            _vfxPacksDict.Clear();
             //_uiPanelsDict.Clear();
             _loadedHandles.Clear();
             IsLoaded = false;
@@ -427,7 +415,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         continue;
                     }
 
-                    var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<GroupReferencePack>(path);
+                    var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<DefaultGroupReferencePack>(path);
 
                     if (instance == null)
                     {

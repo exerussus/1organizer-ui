@@ -42,8 +42,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     }
 
     /// <summary> Пакет с мета-информацией об ассете и ссылкой на него. </summary>
-    public interface IGroupReferencePack
+    public abstract class GroupReferencePack : ScriptableObject
     {
-        public List<AssetReferencePack> AssetPacks { get; set; }
+        public abstract void SetAssetReferencePacks(List<AssetReferencePack> references);
     }
 }
