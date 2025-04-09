@@ -415,7 +415,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         continue;
                     }
 
-                    var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<DefaultGroupReferencePack>(path);
+                    var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<GroupReferencePack>(path);
 
                     if (instance == null)
                     {
@@ -423,7 +423,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                         continue;
                     }
                     
-                    if (!instance.IsValidEditor) continue;
+                    if (instance is DefaultGroupReferencePack defaultGroupReferencePack && !defaultGroupReferencePack.IsValidEditor) continue;
                     
                     unusedGroupReferences.Add(new AssetReferenceT<GroupReferencePack>(guid));
                 }
