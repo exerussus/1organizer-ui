@@ -36,7 +36,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         private async Task InitializingAsync()
         {
-            await Task.Yield(); 
             Clear();
             Instance = this;
             var handles = new List<AsyncOperationHandle<GroupReferencePack>>();
@@ -376,7 +375,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         public void Initialize()
         {
-            InitializeAsync().GetAwaiter().GetResult();
+            _ = InitializeAsync();
         }
         
         public virtual void OnBeforeInitialize() {}
