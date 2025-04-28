@@ -130,6 +130,17 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         // {
         //     return _uiPanelsDict.Values.ToList();
         // }
+
+        public bool TryGetMetaInfo<T>(string id, out T info) where T : ScriptableObject
+        {
+            if (TryGetAssetPack(id, out var resultPack))
+            {
+                return resultPack.TryGetMetaInfo(out info);
+            }
+
+            info = null;
+            return false;
+        }
         
         public List<IAssetReferencePack> GetPacksByType(string type)
         {
