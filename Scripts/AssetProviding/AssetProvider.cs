@@ -34,8 +34,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         public static AssetProvider Instance { get; private set; }
         
-        public async Task InitializeAsync()
+        private async Task InitializingAsync()
         {
+            await Task.Yield(); 
             Clear();
             Instance = this;
             var handles = new List<AsyncOperationHandle<GroupReferencePack>>();
@@ -365,12 +366,17 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             IsLoaded = false;
         }
         
-        public async void Initialize()
+        public async Task InitializeAsync()
         {
             Instance = this;
             OnBeforeInitialize();
-            await InitializeAsync();
+            await InitializingAsync();
             OnInitialize();
+        }
+        
+        public void Initialize()
+        {
+            InitializeAsync().GetAwaiter().GetResult();
         }
         
         public virtual void OnBeforeInitialize() {}

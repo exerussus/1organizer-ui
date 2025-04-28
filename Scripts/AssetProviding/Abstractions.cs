@@ -10,7 +10,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     /// <summary> Главный менеджер ассетов, управляющий загрузкой\выгрузкой через Addressable. </summary>
     public interface IAssetProvider : IInitializable
     {
-        public Task InitializeAsync();
         public List<IAssetReferencePack> GetPacksByType(string type);
         //public Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId);
         //public void UnloadUiPanel(string packId);
