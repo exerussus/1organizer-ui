@@ -7,6 +7,7 @@ using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Object = UnityEngine.Object;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
@@ -33,6 +34,75 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public bool IsLoaded { get; private set; }
         
         public static AssetProvider Instance { get; private set; }
+
+#if UNITY_EDITOR
+
+        private List<GroupReferencePack> Groups_EDITOR = new();
+        private Dictionary<string, AssetReferencePack> _assetPacks_EDITOR = new();
+        
+        /// <summary> Вызывать перед использованием TryGetGroupReferencePacks_Editor и TryGetAssetReferencePack_Editor. </summary>
+        public void RefreshReferences_Editor()
+        {
+            Groups_EDITOR.Clear();
+            _assetPacks_EDITOR.Clear();
+            var tempAssetRefList = new List<AssetReferencePack>();
+            foreach (var groupRef in groupReferences)
+            {
+                Groups_EDITOR.Add(groupRef.editorAsset);
+                groupRef.editorAsset.SetAssetReferencePacks(tempAssetRefList);
+            }
+
+            foreach (var assetReferencePack in tempAssetRefList)
+            {
+                _assetPacks_EDITOR[assetReferencePack.Id] = assetReferencePack;
+            }
+        }
+
+        /// <summary> Ищет конкретные group references. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
+        public bool TryGetGroupReferencePacks_Editor<T>(out List<T> foundGroups) where T : GroupReferencePack
+        {
+            if (Groups_EDITOR.Count == 0) RefreshReferences_Editor();
+            
+            foundGroups = new();
+            
+            foreach (var groupReferencePack in Groups_EDITOR)
+            {
+                if (groupReferencePack is T group) foundGroups.Add(group);
+            }
+            
+            return foundGroups.Count > 0;
+        }
+
+        /// <summary> Ищет AssetReferencePack по gaid. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
+        public bool TryGetAssetReferencePack_Editor(string gaid, out AssetReferencePack assetReferencePack)
+        {
+            if (Groups_EDITOR.Count == 0) RefreshReferences_Editor();
+            
+            return _assetPacks_EDITOR.TryGetValue(gaid, out assetReferencePack);
+        }
+
+        /// <summary> Ищет ассет по gaid и указанию типа. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
+        public bool TryGetAsset_Editor<T>(string gaid, out T asset) where T : Object
+        {
+            if (Groups_EDITOR.Count == 0) RefreshReferences_Editor();
+            
+            if (_assetPacks_EDITOR.TryGetValue(gaid, out var assetReferencePack))
+            {
+                if (assetReferencePack.Reference.editorAsset != null)
+                {
+                    if (assetReferencePack.Reference.editorAsset is T t)
+                    {
+                        asset = t;
+                        return true;
+                    }
+                }
+            }
+
+            asset = null;
+            return false;
+        }
+        
+#endif
         
         private async Task InitializingAsync()
         {
@@ -94,42 +164,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             Debug.Log("AssetManager initialization completed.");
             IsLoaded = true;
         }
-
-        // public async Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId)
-        // {
-        //     if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) 
-        //         return (false, null);
-        //
-        //     if (!_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
-        //     {
-        //         handle = panelUiPack.reference.LoadAssetAsync<GameObject>();
-        //         _loadedPanelHandles[panelUiPack.reference] = handle;
-        //     }
-        //
-        //     if (handle.IsDone)
-        //     {
-        //         return (true, handle.Result);
-        //     }
-        //
-        //     var panelUi = await handle.Task;
-        //     return (panelUi != null, panelUi);
-        // }
-        //
-        // public void UnloadUiPanel(string packId)
-        // {
-        //     if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return;
-        //
-        //     if (_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
-        //     {
-        //         if (handle.IsValid()) Addressables.Release(handle);
-        //         _loadedPanelHandles.Remove(panelUiPack.reference);
-        //     }
-        // }
-            
-        // public List<PanelUiPack> GetAllPanelUiPacks()
-        // {
-        //     return _uiPanelsDict.Values.ToList();
-        // }
 
         public bool TryGetMetaInfo<T>(string id, out T info) where T : ScriptableObject
         {
