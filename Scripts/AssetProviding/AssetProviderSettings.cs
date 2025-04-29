@@ -22,6 +22,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             "game_object",
             "sound",
             "ui_panel",
+            "ui_panel_pack",
             "hero",
             "npc",
             "item",
