@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: ac83d2120da51ab4b936cf2d8ab6992c
+guid: 2fdcf0b691a369040a046eb0cb1df7b5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7924977959701546424
-    second: cyber_assets_0
+      213: -5631667541137320841
+    second: ex_org_cyber_assets_0
   - first:
-      213: -5555749418463151173
-    second: cyber_assets_1
+      213: -7778267246254515860
+    second: ex_org_cyber_assets_1
   - first:
-      213: -8409358055342717660
-    second: cyber_assets_2
+      213: -6364843149683443006
+    second: ex_org_cyber_assets_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -102,24 +102,11 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cyber_assets_0
+      name: ex_org_cyber_assets_0
       rect:
         serializedVersion: 2
         x: 3
@@ -134,14 +121,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 84a7033b882d40290800000000000000
-      internalID: -7924977959701546424
+      spriteID: 774996d853c48d1b0800000000000000
+      internalID: -5631667541137320841
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cyber_assets_1
+      name: ex_org_cyber_assets_1
       rect:
         serializedVersion: 2
         x: 44
@@ -156,14 +143,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bbbbb6be65306e2b0800000000000000
-      internalID: -5555749418463151173
+      spriteID: c6991fa862b0e0490800000000000000
+      internalID: -7778267246254515860
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cyber_assets_2
+      name: ex_org_cyber_assets_2
       rect:
         serializedVersion: 2
         x: 65
@@ -178,8 +165,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4254a324765fb4b80800000000000000
-      internalID: -8409358055342717660
+      spriteID: 2ca3a04b0e88ba7a0800000000000000
+      internalID: -6364843149683443006
       vertices: []
       indices: 
       edges: []
@@ -197,10 +184,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      cyber_assets_0: -7924977959701546424
-      cyber_assets_1: -5555749418463151173
-      cyber_assets_2: -8409358055342717660
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

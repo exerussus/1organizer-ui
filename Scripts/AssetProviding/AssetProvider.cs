@@ -421,28 +421,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         [Button("Validate")]
         public virtual void OnValidate()
         {
-            //ChangeIcon();
             FillUnusedPacks();
-        }
-        
-        [SerializeField, HideInInspector] private bool m_hasIcon;
-        private void ChangeIcon()
-        {
-            if (m_hasIcon) return;
-            
-            var resource = Resources.Load<AssetProviderSettings>("AssetProviderSettings");
-            var icon = resource.AssetProviderTexture;
-            
-            if (icon == null) return;
-
-            var path = UnityEditor.AssetDatabase.GetAssetPath(this);
-            var obj = UnityEditor.AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
-
-            if (obj == null) return;
-            
-            UnityEditor.EditorGUIUtility.SetIconForObject(obj, icon);
-            UnityEditor.EditorUtility.SetDirty(obj); 
-            m_hasIcon = true;
         }
         
         private void FillUnusedPacks()
@@ -478,9 +457,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                     unusedGroupReferences.Add(new AssetReferenceT<GroupReferencePack>(guid));
                 }
             }
-
-            groupReferences.RemoveAll(gr => gr == null || string.IsNullOrEmpty(gr.AssetGUID) || !UnityEditor.AssetDatabase.GUIDToAssetPath(gr.AssetGUID).EndsWith(".asset"));
-            Debug.Log("Unused group references filled and invalid references removed.");
         }
         
         [UnityEditor.InitializeOnLoad]

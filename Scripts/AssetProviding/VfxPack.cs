@@ -39,7 +39,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (m_hasIcon) return;
             
-            var resource = Resources.Load<AssetProviderSettings>("AssetProviderSettings");
+            var resource = AssetProviderSettings.GetInstanceEditor();
             var icon = resource.VfxPackTexture;
             
             if (icon == null) return;
