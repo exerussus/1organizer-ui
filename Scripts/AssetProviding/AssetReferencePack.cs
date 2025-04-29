@@ -12,13 +12,14 @@ namespace Source.Scripts.Global.Managers.AssetManagement
     {
         public string id;
         [ValueDropdown("AssetTypeValues")] public string assetType;
-        public List<string> tags = new();
+        [ValueDropdown("TagValues")] public List<string> tags = new();
         public AssetReference reference;
         public List<ScriptableObject> metaInfo;
         
         private Dictionary<Type, ScriptableObject> _metaInfoDict = new();
 
         private static List<string> AssetTypeValues => AssetProviderSettings.GetInstanceEditor().AssetTypes; 
+        private static List<string> TagValues => AssetProviderSettings.GetInstanceEditor().Tags; 
         
         public string Id
         {

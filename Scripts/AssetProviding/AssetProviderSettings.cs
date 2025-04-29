@@ -27,8 +27,13 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             "npc",
             "item",
         };
+        [SerializeField] private List<string> tags = new List<string>()
+        {
+            
+        };
 
         public List<string> AssetTypes => assetTypes;
+        public List<string> Tags => tags;
 
         public const string SettingsFolder = "Assets/Configs/Exerussus/AssetProvider/"; 
         public const string SettingsAssetName = "AssetProviderSettings";
