@@ -1,10 +1,6 @@
 {
   "name": "com.exerussus.1organizer-ui",
-<<<<<<< HEAD
-  "version": "1.0.77",
-=======
-  "version": "1.0.75",
->>>>>>> parent of b5de06a (Auto updated to version 1.0.76)
+  "version": "1.0.79",
   "displayName": "1Organizer UI",
   "description": "Плагин для управлением UI модулями с использованием Addressables.",
   "unity": "2020.3",
