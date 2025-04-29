@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Object = UnityEngine.Object;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
@@ -15,16 +14,24 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     {
 #if UNITY_EDITOR
         /// <summary> Хранит все активные группы, которые будут загружаться при инициализации. </summary>
-        [SerializeField] protected List<GroupReferencePack> groupReferences_EDITOR = new();
+        [SerializeField] public List<GroupReferencePack> groupReferences_EDITOR = new();
+
         /// <summary> Хранит деактивированные группы, которые можно подключить через Inspector. </summary>
-        [SerializeField] protected List<GroupReferencePack> unusedGroupReferences_EDITOR = new();
-        [SerializeField, FoldoutGroup("DEBUG")] protected ExistingGuidGroupPacks existingGuidGroupPacks = new();
+        [SerializeField] public List<GroupReferencePack> unusedGroupReferences_EDITOR = new();
+
+        [SerializeField, FoldoutGroup("DEBUG")]
+        protected ExistingGuidGroupPacks existingGuidGroupPacks = new();
 #endif
         /// <summary> Хранит все активные группы, которые будут загружаться при инициализации. </summary>
         [SerializeField, ReadOnly] protected List<AssetReferenceT<GroupReferencePack>> groupReferences;
+
         /// <summary> Проинициализированные группы. </summary>
         [SerializeField, ReadOnly] protected List<GroupReferencePack> groups = new();
-        
+
+#if UNITY_EDITOR
+        [SerializeField] private bool autoValidate = false;
+#endif
+
         protected Dictionary<string, IAssetReferencePack> _assetPacks = new();
         protected Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
         protected Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
@@ -33,9 +40,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         protected Dictionary<AssetReference, AsyncOperationHandle<GameObject>> _loadedPanelHandles = new();
         public List<GroupReferencePack> Groups => groups;
         public bool IsLoaded { get; private set; }
-        
+
         public static AssetProvider Instance { get; private set; }
-        
+
         private async Task InitializingAsync()
         {
             Clear();
@@ -107,7 +114,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             info = null;
             return false;
         }
-        
+
         public List<IAssetReferencePack> GetPacksByType(string type)
         {
             return _typePacks.TryGetValue(type, out var packs) ? packs : new List<IAssetReferencePack>();
@@ -122,7 +129,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             return _assetPacks.TryGetValue(id, out assetReferencePack);
         }
-        
+
         public async Task<T> LoadAssetPackAsync<T>(string packId) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
@@ -158,7 +165,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 return null;
             }
         }
-        
+
         public async Task<(bool, VfxPack)> TryLoadVfxPackAsync(string packId)
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
@@ -194,7 +201,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _assetPackReferenceCounts.Remove(packId);
             return (false, null);
         }
-        
+
         public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(string packId, Action<string, LogType> messageCallback) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
@@ -215,9 +222,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 messageCallback.Invoke($"AssetPack with ID {packId} not found!", LogType.Error);
                 return (false, null);
             }
-            
+
             messageCallback.Invoke($"Loading new asset pack: {packId}, type: {typeof(T)}", LogType.Log);
-            
+
             var newHandle = assetPack.Reference.LoadAssetAsync<T>();
             _assetPackHandles.Add(packId, newHandle);
             _assetPackReferenceCounts[packId] = 1;
@@ -238,8 +245,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public bool TryGetAssetPack(string packId, out IAssetReferencePack resultPack)
         {
             return _assetPacks.TryGetValue(packId, out resultPack);
-        }  
-        
+        }
+
         public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(string packId) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
@@ -261,9 +268,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 Debug.LogError($"AssetPack with ID {packId} not found!");
                 return (false, null);
             }
-            
+
             Debug.Log($"Loading new asset pack: {packId}, type: {typeof(T)}");
-            
+
             var newHandle = assetPack.Reference.LoadAssetAsync<T>();
             _assetPackHandles.Add(packId, newHandle);
             _assetPackReferenceCounts[packId] = 1;
@@ -320,7 +327,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                     }
                 }
             }
-            
+
             groups.Clear();
             _assetPacks.Clear();
             _typePacks.Clear();
@@ -330,7 +337,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _loadedHandles.Clear();
             IsLoaded = false;
         }
-        
+
         public async Task InitializeAsync()
         {
             Instance = this;
@@ -338,23 +345,51 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             await InitializingAsync();
             OnInitialize();
         }
-        
+
         public void Initialize()
         {
             _ = InitializeAsync();
         }
-        
-        public virtual void OnBeforeInitialize() {}
-        public virtual void OnInitialize() {}
-        
-        
+
+        public virtual void OnBeforeInitialize()
+        {
+        }
+
+        public virtual void OnInitialize()
+        {
+        }
+
+        public virtual void OnValidate()
+        {
+            if (!autoValidate) return;
+            ValidateGroups();
+        }
+
 #if UNITY_EDITOR
+        
         /// <summary> Используется ТОЛЬКО в Editor </summary>
         [Button("Validate")]
-        public virtual void OnValidate()
+        public void ValidateGroups()
         {
             //ChangeIcon();
             FillUnusedPacks();
+        }
+
+        [Button("Set assets by references")]
+        public void SetAssetsByReferences()
+        {
+            foreach (var groupReferencePack in groupReferences_EDITOR)
+            {
+                foreach (var assetReferencePack in groupReferencePack.GetAssetReferencePacksEditor())
+                {
+                    if (assetReferencePack.editorAsset != null) continue;
+                    
+                    if (Editor.QOL.AddressableQoL.IsAssetAddressableByGuid(assetReferencePack.Reference.AssetGUID))
+                    {
+                        
+                    }
+                }
+            }
         }
         
         [SerializeField, HideInInspector] private bool m_hasIcon;
@@ -430,7 +465,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             foreach (var groupReferencePack in groupReferences_EDITOR)
             {
-                var list = groupReferencePack.GetAssetReferencePacksOnValidate();
+                var list = groupReferencePack.GetAssetReferencePacksEditor();
                 if (list == null) continue;
 
                 foreach (var assetReferencePack in list)

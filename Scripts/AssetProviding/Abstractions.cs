@@ -44,6 +44,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     public abstract class GroupReferencePack : ScriptableObject
     {
         public abstract void SetAssetReferencePacks(List<AssetReferencePack> references);
-        public virtual List<AssetReferencePack> GetAssetReferencePacksOnValidate() { return null; }
+        public virtual List<AssetReferencePack> GetAssetReferencePacksEditor() { return null; }
     }
 }

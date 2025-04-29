@@ -21,7 +21,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             foreach (var assetPack in assetPacks) references.Add(assetPack);
         }
         
-        public override List<AssetReferencePack> GetAssetReferencePacksOnValidate()
+        public override List<AssetReferencePack> GetAssetReferencePacksEditor()
         {
             return AssetPacks;
         }

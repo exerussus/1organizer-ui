@@ -16,10 +16,10 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public List<string> tags = new();
 #if UNITY_EDITOR
         public Object editorAsset;
-        [ReadOnly] public GuidReferencePack guidReferencePack = new();
+        [ReadOnly, FoldoutGroup("DEBUG", order:999)] public GuidReferencePack guidReferencePack = new();
 #endif
         public List<ScriptableObject> metaInfo;
-        [ReadOnly] public AssetReference reference;
+        [ReadOnly, FoldoutGroup("DEBUG")] public AssetReference reference;
         
         private Dictionary<Type, ScriptableObject> _metaInfoDict = new();
         
@@ -125,7 +125,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 Reference = guidReferencePack.assetReference;
             }
                     
-            if (!Reference.RuntimeKeyIsValid() || !Editor.QOL.AddressableQoL.IsAssetAddressable(editorAsset))
+            if (!Reference.RuntimeKeyIsValid() || !Editor.QOL.AddressableQoL.IsAssetAddressableByAsset(editorAsset))
             {
                 guidReferencePack.assetReference = new AssetReference(guidReferencePack.guid);
             }
@@ -135,7 +135,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 troubles += $"assetReference не валиден.\n";
                 hasErrors = true;
             }
-            if (!Editor.QOL.AddressableQoL.IsAssetAddressable(editorAsset))
+            if (!Editor.QOL.AddressableQoL.IsAssetAddressableByAsset(editorAsset))
             {
                 troubles += $"assetReference не является addressable.\n";
                 hasErrors = true;
