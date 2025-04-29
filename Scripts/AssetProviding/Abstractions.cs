@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Exerussus._1Extensions.Abstractions;
-using Exerussus._1OrganizerUI.Scripts.AssetProviding;
+using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -44,6 +44,5 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     public abstract class GroupReferencePack : ScriptableObject
     {
         public abstract void SetAssetReferencePacks(List<AssetReferencePack> references);
-        public virtual List<AssetReferencePack> GetAssetReferencePacksOnValidate() { return null; }
     }
 }

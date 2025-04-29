@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using Sirenix.OdinInspector;
+using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -13,19 +13,17 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     [CreateAssetMenu(menuName = "Exerussus/AssetProviding/AssetProvider", fileName = "AssetProvider")]
     public class AssetProvider : ScriptableObject, IAssetProvider
     {
+        /// <summary> Хранит все активные группы, которые будут загружаться при инициализации. </summary>
+        [SerializeField] protected List<AssetReferenceT<GroupReferencePack>> groupReferences;
 #if UNITY_EDITOR
-        /// <summary> Хранит все активные группы, которые будут загружаться при инициализации. </summary>
-        [SerializeField] protected List<GroupReferencePack> groupReferences_EDITOR = new();
         /// <summary> Хранит деактивированные группы, которые можно подключить через Inspector. </summary>
-        [SerializeField] protected List<GroupReferencePack> unusedGroupReferences_EDITOR = new();
-        [SerializeField, FoldoutGroup("DEBUG")] protected ExistingGuidGroupPacks existingGuidGroupPacks = new();
+        [SerializeField] protected List<AssetReferenceT<GroupReferencePack>> unusedGroupReferences = new();
 #endif
-        /// <summary> Хранит все активные группы, которые будут загружаться при инициализации. </summary>
-        [SerializeField, ReadOnly] protected List<AssetReferenceT<GroupReferencePack>> groupReferences;
         /// <summary> Проинициализированные группы. </summary>
         [SerializeField, ReadOnly] protected List<GroupReferencePack> groups = new();
         
         protected Dictionary<string, IAssetReferencePack> _assetPacks = new();
+        //protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
         protected Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
         protected Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
         protected Dictionary<string, int> _assetPackReferenceCounts = new();
@@ -96,6 +94,42 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             Debug.Log("AssetManager initialization completed.");
             IsLoaded = true;
         }
+
+        // public async Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId)
+        // {
+        //     if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) 
+        //         return (false, null);
+        //
+        //     if (!_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
+        //     {
+        //         handle = panelUiPack.reference.LoadAssetAsync<GameObject>();
+        //         _loadedPanelHandles[panelUiPack.reference] = handle;
+        //     }
+        //
+        //     if (handle.IsDone)
+        //     {
+        //         return (true, handle.Result);
+        //     }
+        //
+        //     var panelUi = await handle.Task;
+        //     return (panelUi != null, panelUi);
+        // }
+        //
+        // public void UnloadUiPanel(string packId)
+        // {
+        //     if (!_uiPanelsDict.TryGetValue(packId, out var panelUiPack)) return;
+        //
+        //     if (_loadedPanelHandles.TryGetValue(panelUiPack.reference, out var handle))
+        //     {
+        //         if (handle.IsValid()) Addressables.Release(handle);
+        //         _loadedPanelHandles.Remove(panelUiPack.reference);
+        //     }
+        // }
+            
+        // public List<PanelUiPack> GetAllPanelUiPacks()
+        // {
+        //     return _uiPanelsDict.Values.ToList();
+        // }
 
         public bool TryGetMetaInfo<T>(string id, out T info) where T : ScriptableObject
         {
@@ -379,67 +413,40 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         private void FillUnusedPacks()
         {
-            existingGuidGroupPacks.Initialize();
             var allInstances = UnityEditor.AssetDatabase.FindAssets("t:GroupReferencePack");
-            var groupRefs = new HashSet<GroupReferencePack>(groupReferences_EDITOR);
-            var tempGroupRefs = new HashSet<GroupReferencePack>(groupReferences_EDITOR);
-            var unusedGroupReferences = new HashSet<GroupReferencePack>(unusedGroupReferences_EDITOR);
-            
-            foreach (var groupRef in groupRefs)
+            var usedGroupReferences = new HashSet<string>(groupReferences
+                .Where(gr => gr != null && !string.IsNullOrEmpty(gr.AssetGUID)) // Исключаем null и пустые GUID.
+                .Select(gr => gr.AssetGUID));
+
+            unusedGroupReferences.Clear();
+
+            foreach (var guid in allInstances)
             {
-                if (unusedGroupReferences.Contains(groupRef)) unusedGroupReferences.Remove(groupRef);
-            }
-            
-            foreach (var groupGuid in allInstances)
-            {
-                var path = UnityEditor.AssetDatabase.GUIDToAssetPath(groupGuid);
-                
-                var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<GroupReferencePack>(path);
-                
-                tempGroupRefs.Remove(instance);
-                
-                if (!existingGuidGroupPacks.Contains(instance)) existingGuidGroupPacks.Add(groupGuid, path, instance);
-                
-                if (instance == null)
+                if (!usedGroupReferences.Contains(guid))
                 {
-                    Debug.LogWarning($"Asset at path '{path}' could not be loaded and will be skipped.");
-                    continue;
+                    var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        Debug.LogWarning($"Asset with GUID {guid} has an invalid path and will be skipped.");
+                        continue;
+                    }
+
+                    var instance = UnityEditor.AssetDatabase.LoadAssetAtPath<GroupReferencePack>(path);
+
+                    if (instance == null)
+                    {
+                        Debug.LogWarning($"Asset at path '{path}' could not be loaded and will be skipped.");
+                        continue;
+                    }
+                    
+                    if (instance is DefaultGroupReferencePack defaultGroupReferencePack && !defaultGroupReferencePack.IsValidEditor) continue;
+                    
+                    unusedGroupReferences.Add(new AssetReferenceT<GroupReferencePack>(guid));
                 }
-                
-                if (groupRefs.Contains(instance)) continue;
-                if (unusedGroupReferences.Contains(instance)) continue;
-
-                unusedGroupReferences.Add(instance);
             }
 
-            foreach (var groupReferencePack in tempGroupRefs)
-            {
-                groupRefs.Remove(groupReferencePack);
-            }
-
-            groupReferences_EDITOR = new (groupRefs);
-            unusedGroupReferences_EDITOR = new (unusedGroupReferences);
-
-            groupReferences.Clear();
-            foreach (var groupReferencePack in groupReferences_EDITOR)
-            {
-                groupReferences.Add(existingGuidGroupPacks.GetAssetReference(groupReferencePack));
-            }
-            
             groupReferences.RemoveAll(gr => gr == null || string.IsNullOrEmpty(gr.AssetGUID) || !UnityEditor.AssetDatabase.GUIDToAssetPath(gr.AssetGUID).EndsWith(".asset"));
-
-            foreach (var groupReferencePack in groupReferences_EDITOR)
-            {
-                var list = groupReferencePack.GetAssetReferencePacksOnValidate();
-                if (list == null) continue;
-
-                foreach (var assetReferencePack in list)
-                {
-                    assetReferencePack.Validate(groupReferencePack);
-                }
-            }
-            
-            Debug.Log("AssetProvider validated.");
+            Debug.Log("Unused group references filled and invalid references removed.");
         }
         
         [UnityEditor.InitializeOnLoad]
