@@ -1,6 +1,6 @@
 ﻿
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -14,7 +14,21 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         [SerializeField] private Texture2D organizerIconName;
         [SerializeField] private Texture2D vfxPackTexture;
 #endif
-        
+        [SerializeField] private List<string> assetTypes = new List<string>()
+        {
+            "sprite",
+            "vfx",
+            "vfx_pack",
+            "game_object",
+            "sound",
+            "ui_panel",
+            "hero",
+            "npc",
+            "item",
+        };
+
+        public List<string> AssetTypes => assetTypes;
+
         public const string SettingsFolder = "Assets/Configs/Exerussus/AssetProvider/"; 
         public const string SettingsAssetName = "AssetProviderSettings";
         
@@ -97,6 +111,18 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             {
 #if UNITY_EDITOR
                 return vfxPackTexture;
+#else
+            return null;
+#endif
+            }
+        }
+        
+        public Texture2D OrganizerTexture
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return organizerIconName;
 #else
             return null;
 #endif

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -10,12 +11,14 @@ namespace Source.Scripts.Global.Managers.AssetManagement
     public class AssetReferencePack : IAssetReferencePack
     {
         public string id;
-        public string assetType;
+        [ValueDropdown("AssetTypeValues")] public string assetType;
         public List<string> tags = new();
         public AssetReference reference;
         public List<ScriptableObject> metaInfo;
         
         private Dictionary<Type, ScriptableObject> _metaInfoDict = new();
+
+        private static List<string> AssetTypeValues => AssetProviderSettings.GetInstanceEditor().AssetTypes; 
         
         public string Id
         {
