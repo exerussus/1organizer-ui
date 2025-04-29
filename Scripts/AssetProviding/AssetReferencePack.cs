@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Exerussus._1OrganizerUI.Scripts.AssetProviding;
+using Sirenix.OdinInspector;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using Object = UnityEngine.Object;
 
-namespace Source.Scripts.Global.Managers.AssetManagement
+namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
     [Serializable]
     public class AssetReferencePack : IAssetReferencePack
@@ -12,8 +14,12 @@ namespace Source.Scripts.Global.Managers.AssetManagement
         public string id;
         public string assetType;
         public List<string> tags = new();
-        public AssetReference reference;
+#if UNITY_EDITOR
+        public Object editorAsset;
+        [ReadOnly] public GuidReferencePack guidReferencePack = new();
+#endif
         public List<ScriptableObject> metaInfo;
+        [ReadOnly] public AssetReference reference;
         
         private Dictionary<Type, ScriptableObject> _metaInfoDict = new();
         
@@ -72,6 +78,75 @@ namespace Source.Scripts.Global.Managers.AssetManagement
             
             info = null;
             return false;
+        }
+
+        public void Validate(GroupReferencePack parentGroupReferencePack)
+        {
+#if UNITY_EDITOR
+            var hasErrors = false;
+            var troubles = "";
+
+            if (string.IsNullOrEmpty(id))
+            {
+                troubles += $"Troubles in group reference pack {parentGroupReferencePack.name}:\nAssetReferencePack id отсутствует.\n";
+                hasErrors = true;
+            }
+            else
+            {
+                troubles += $"Troubles with asset reference pack {id}:\n";
+            }
+            
+            if (editorAsset == null)
+            {
+                troubles += "AssetReferencePack editorAsset отсутствует.\n";
+                hasErrors = true;
+            }
+            
+            if (string.IsNullOrEmpty(assetType))
+            {
+                troubles += "AssetReferencePack assetType отсутствует.\n";
+                hasErrors = true;
+            }
+
+            if (hasErrors)
+            {
+                troubles += $"\n\npath: {AssetDatabase.GetAssetPath(parentGroupReferencePack)}\n";
+                Debug.LogError(troubles, parentGroupReferencePack);
+                return;
+            }
+            
+            var prevPath = guidReferencePack.path;
+            guidReferencePack.path = AssetDatabase.GetAssetPath(editorAsset);
+
+            if (prevPath != guidReferencePack.path)
+            {
+                guidReferencePack.guid = AssetDatabase.AssetPathToGUID(guidReferencePack.path);
+                guidReferencePack.assetReference = new AssetReference(guidReferencePack.guid);
+                Reference = guidReferencePack.assetReference;
+            }
+                    
+            if (!Reference.RuntimeKeyIsValid() || !Editor.QOL.AddressableQoL.IsAssetAddressable(editorAsset))
+            {
+                guidReferencePack.assetReference = new AssetReference(guidReferencePack.guid);
+            }
+            
+            if (!Reference.RuntimeKeyIsValid())
+            {
+                troubles += $"assetReference не валиден.\n";
+                hasErrors = true;
+            }
+            if (!Editor.QOL.AddressableQoL.IsAssetAddressable(editorAsset))
+            {
+                troubles += $"assetReference не является addressable.\n";
+                hasErrors = true;
+            }
+
+            if (hasErrors)
+            {
+                troubles += $"\n\npath: {AssetDatabase.GetAssetPath(parentGroupReferencePack)}\n";
+                Debug.LogError(troubles, parentGroupReferencePack);
+            }
+#endif
         }
     }
 }

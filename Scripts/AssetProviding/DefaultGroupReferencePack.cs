@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
-using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,6 +19,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public override void SetAssetReferencePacks(List<AssetReferencePack> references)
         {
             foreach (var assetPack in assetPacks) references.Add(assetPack);
+        }
+        
+        public override List<AssetReferencePack> GetAssetReferencePacksOnValidate()
+        {
+            return AssetPacks;
         }
         
         public virtual void TypeValidate() { }
