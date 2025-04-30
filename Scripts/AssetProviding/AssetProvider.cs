@@ -71,13 +71,57 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         }
 
         /// <summary> Возвращает список AssetReferencePack по указанному asset type. </summary>
-        public bool TryGetAllAssetReferencePacksOfAssetType(string assetType, out List<AssetReferencePack> assetReferencePacks)
+        public bool TryGetAllAssetReferencePacksOfAssetType_Editor(string assetType, out List<AssetReferencePack> assetReferencePacks)
         {
             return _assetPacksByAssetType_EDITOR.TryGetValue(assetType, out assetReferencePacks);
         }
 
+        /// <summary> Возвращает AssetReferencePack и GroupReferencePack по id. </summary>
+        public bool TryGetFullInfo_Editor(string id, out (AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack) info)
+        {
+            if (!_assetPacks_EDITOR.TryGetValue(id, out var assetReferencePack))
+            {
+                info = default;
+                return false;
+            }
+
+            info = (assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack]);
+            return true;
+        }
+
+        /// <summary> Возвращает AssetReferencePack и GroupReferencePack по id, а так же приводит ассет к типу. </summary>
+        /// <returns>found - найден ли ассет, success - приведён ли ассет к типу.</returns>
+        public (bool found, bool success) TryGetFullInfo_Editor<T>(string id, out (AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack, T asset) info)
+        {
+            if (!_assetPacks_EDITOR.TryGetValue(id, out var assetReferencePack))
+            {
+                info = default;
+                return (false, false);
+            }
+            
+            if (typeof(Sprite) == typeof(T))
+            {
+                var sprite = GetFirstSpriteFromAssetReference(assetReferencePack.Reference);
+                if (sprite is T result)
+                {
+                    info = (assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack], result);
+                    return (true, sprite != null);
+                }
+            }
+
+            if (assetReferencePack.Reference.editorAsset is T asset)
+            {
+                info = (assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack], asset);
+                return (true, true);
+                
+            }
+            
+            info = (assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack], default);
+            return (true, false);
+        }
+
         /// <summary> Возвращает лист ассетов с приведением к типу, и лист некорректных референсов, которые не удалось привести к указанному типу. </summary>
-        public bool TryGetAllAssetsOfAssetType<T>(string assetType, 
+        public bool TryGetAllAssetsOfAssetType_Editor<T>(string assetType, 
             out List<(string id, AssetReferencePack assetReferencePack, T asset)> assets,
             out List<(AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack)> invalidAssets)
         {
@@ -104,7 +148,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             foreach (var assetReferencePack in assetReferencePacks)
             {
-                if (assetReferencePack is T asset) assets.Add((assetReferencePack.Id, assetReferencePack, asset));
+                if (assetReferencePack.Reference.editorAsset is T asset) assets.Add((assetReferencePack.Id, assetReferencePack, asset));
                 else invalidAssets.Add((assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack]));
             }
             
