@@ -39,25 +39,78 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         private List<GroupReferencePack> Groups_EDITOR = new();
         private Dictionary<string, AssetReferencePack> _assetPacks_EDITOR = new();
+        private Dictionary<string, List<AssetReferencePack>> _assetPacksByAssetType_EDITOR = new();
+        private Dictionary<AssetReferencePack, GroupReferencePack> _groupsByAssetRefPack_EDITOR = new();
         
         /// <summary> Вызывать перед использованием TryGetGroupReferencePacks_Editor и TryGetAssetReferencePack_Editor. </summary>
         public void RefreshReferences_Editor()
         {
             Groups_EDITOR.Clear();
             _assetPacks_EDITOR.Clear();
-            var tempAssetRefList = new List<AssetReferencePack>();
+            var tempAllAssetRefList = new List<AssetReferencePack>();
+            var tempAssetPacksOfGroupList = new List<AssetReferencePack>();
+            
             foreach (var groupRef in groupReferences)
             {
+                tempAssetPacksOfGroupList.Clear();
                 Groups_EDITOR.Add(groupRef.editorAsset);
-                groupRef.editorAsset.SetAssetReferencePacks(tempAssetRefList);
+                groupRef.editorAsset.SetAssetReferencePacks(tempAssetPacksOfGroupList);
+                foreach (var assetRef in tempAssetPacksOfGroupList)
+                {
+                    _groupsByAssetRefPack_EDITOR[assetRef] = groupRef.editorAsset;
+                    tempAllAssetRefList.Add(assetRef);
+                }
             }
 
-            foreach (var assetReferencePack in tempAssetRefList)
+            foreach (var assetReferencePack in tempAllAssetRefList)
             {
                 _assetPacks_EDITOR[assetReferencePack.Id] = assetReferencePack;
+                if (!_assetPacksByAssetType_EDITOR.ContainsKey(assetReferencePack.AssetType)) _assetPacksByAssetType_EDITOR[assetReferencePack.AssetType] = new();
+                _assetPacksByAssetType_EDITOR[assetReferencePack.AssetType].Add(assetReferencePack);
             }
         }
 
+        /// <summary> Возвращает список AssetReferencePack по указанному asset type. </summary>
+        public bool TryGetAllAssetReferencePacksOfAssetType(string assetType, out List<AssetReferencePack> assetReferencePacks)
+        {
+            return _assetPacksByAssetType_EDITOR.TryGetValue(assetType, out assetReferencePacks);
+        }
+
+        /// <summary> Возвращает лист ассетов с приведением к типу, и лист некорректных референсов, которые не удалось привести к указанному типу. </summary>
+        public bool TryGetAllAssetsOfAssetType<T>(string assetType, 
+            out List<(string id, AssetReferencePack assetReferencePack, T asset)> assets,
+            out List<(AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack)> invalidAssets)
+        {
+            if (!_assetPacksByAssetType_EDITOR.TryGetValue(assetType, out var assetReferencePacks))
+            {
+                assets = null;
+                invalidAssets = null;
+                return false;
+            }
+            
+            assets = new();
+            invalidAssets = new();
+            
+            if (typeof(Sprite) == typeof(T))
+            {
+                foreach (var assetReferencePack in assetReferencePacks)
+                {
+                    var sprite = GetFirstSpriteFromAssetReference(assetReferencePack.Reference);
+                    if (sprite != null && sprite is T t) assets.Add((assetReferencePack.Id, assetReferencePack, t));
+                    else invalidAssets.Add((assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack]));
+                }
+                return assets.Count > 0;
+            }
+            
+            foreach (var assetReferencePack in assetReferencePacks)
+            {
+                if (assetReferencePack is T asset) assets.Add((assetReferencePack.Id, assetReferencePack, asset));
+                else invalidAssets.Add((assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack]));
+            }
+            
+            return assets.Count > 0;
+        }
+        
         /// <summary> Ищет конкретные group references. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
         public bool TryGetGroupReferencePacks_Editor<T>(out List<T> foundGroups) where T : GroupReferencePack
         {
@@ -73,20 +126,20 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return foundGroups.Count > 0;
         }
 
-        /// <summary> Ищет AssetReferencePack по gaid. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
-        public bool TryGetAssetReferencePack_Editor(string gaid, out AssetReferencePack assetReferencePack)
+        /// <summary> Ищет AssetReferencePack по id. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
+        public bool TryGetAssetReferencePack_Editor(string id, out AssetReferencePack assetReferencePack)
         {
             if (Groups_EDITOR.Count == 0) RefreshReferences_Editor();
             
-            return _assetPacks_EDITOR.TryGetValue(gaid, out assetReferencePack);
+            return _assetPacks_EDITOR.TryGetValue(id, out assetReferencePack);
         }
 
-        /// <summary> Ищет ассет по gaid и указанию типа. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
-        public bool TryGetAsset_Editor<T>(string gaid, out T asset) where T : Object
+        /// <summary> Ищет ассет по id и указанию типа. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
+        public bool TryGetAsset_Editor<T>(string id, out T asset) where T : Object
         {
             if (Groups_EDITOR.Count == 0) RefreshReferences_Editor();
             
-            if (_assetPacks_EDITOR.TryGetValue(gaid, out var assetReferencePack))
+            if (_assetPacks_EDITOR.TryGetValue(id, out var assetReferencePack))
             {
                 if (typeof(Sprite) == typeof(T))
                 {
