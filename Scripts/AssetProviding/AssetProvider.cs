@@ -88,6 +88,16 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             if (_assetPacks_EDITOR.TryGetValue(gaid, out var assetReferencePack))
             {
+                if (typeof(Sprite) == typeof(T))
+                {
+                    var sprite = GetFirstSpriteFromAssetReference(assetReferencePack.Reference);
+                    if (sprite != null && sprite is T t)
+                    {
+                        asset = t;
+                        return true;
+                    }
+                }
+                
                 if (assetReferencePack.Reference.editorAsset != null)
                 {
                     if (assetReferencePack.Reference.editorAsset is T t)
@@ -100,6 +110,22 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             asset = null;
             return false;
+        }
+        
+        private static Sprite GetFirstSpriteFromAssetReference(AssetReference reference)
+        {
+            if (reference.editorAsset is Texture2D texture)
+            {
+                // Получаем все саб-объекты по пути
+                string path = UnityEditor.AssetDatabase.GetAssetPath(texture);
+                Object[] assets = UnityEditor.AssetDatabase.LoadAllAssetRepresentationsAtPath(path);
+
+                foreach (Object asset in assets)
+                {
+                    if (asset is Sprite sprite) return sprite;
+                }
+            }
+            return null;
         }
         
 #endif
