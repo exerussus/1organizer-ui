@@ -11,15 +11,23 @@ namespace Source.Scripts.Global.Managers.AssetManagement
     public class AssetReferencePack : IAssetReferencePack
     {
         public string id;
-        [ValueDropdown("AssetTypeValues")] public string assetType;
-        [ValueDropdown("TagValues")] public List<string> tags = new();
+#if UNITY_EDITOR
+        [ValueDropdown("AssetTypeValues")] 
+#endif
+        public string assetType;
+#if UNITY_EDITOR
+        [ValueDropdown("TagValues")] 
+#endif
+        public List<string> tags = new();
         public AssetReference reference;
         public List<ScriptableObject> metaInfo;
         
         private Dictionary<Type, ScriptableObject> _metaInfoDict = new();
 
-        private static List<string> AssetTypeValues => AssetProviderSettings.GetInstanceEditor().AssetTypes; 
+#if UNITY_EDITOR
+        private static List<string> AssetTypeValues => AssetProviderSettings.GetInstanceEditor().AssetTypes;
         private static List<string> TagValues => AssetProviderSettings.GetInstanceEditor().Tags; 
+#endif
         
         public string Id
         {
