@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Source.Scripts.Global.Managers.AssetManagement;
@@ -74,23 +75,22 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             if (_needValidateCyberAssets) InvokeValidateCyberAssets();
         }
-        
-        private void ChangeIcon()
+
+        [Button("Поправить группы")]
+        private void FixRefsAddressableGroups()
         {
-            if (m_hasIcon) return;
-            
-            var resource = AssetProviderSettings.GetInstanceEditor();
-            var icon = resource.GroupReferenceTexture;
-            if (icon == null) return;
-
-            var path = UnityEditor.AssetDatabase.GetAssetPath(this);
-            var obj = UnityEditor.AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
-
-            if (obj == null) return;
-            
-            UnityEditor.EditorGUIUtility.SetIconForObject(obj, icon);
-            UnityEditor.EditorUtility.SetDirty(obj); 
-            m_hasIcon = true;
+            foreach (var assetReferencePack in assetPacks)
+            {
+                try
+                {
+                    AddressableEditorExtensions.EnsureAssetsAreAddressable(assetReferencePack.Reference);
+                    AddressableEditorExtensions.SyncReferenceToPackGroup(this, assetReferencePack.Reference);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            }
         }
 
         [Button]

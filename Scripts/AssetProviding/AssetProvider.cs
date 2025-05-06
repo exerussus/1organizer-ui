@@ -559,6 +559,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 {
                     try
                     {
+                        AddressableEditorExtensions.EnsureAssetsAreAddressable(assetReferencePack.Reference);
                         AddressableEditorExtensions.SyncReferenceToPackGroup(groupRef.editorAsset, assetReferencePack.Reference);
                     }
                     catch (Exception e)
