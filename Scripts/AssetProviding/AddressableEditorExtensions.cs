@@ -54,10 +54,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 settings.MoveEntry(referenceEntry, groupOfPack);
                 Debug.Log($"Moved '{reference.AssetGUID}' to group '{groupOfPack.Name}'.");
             }
-            else
-            {
-                Debug.Log("Reference is already in the correct group.");
-            }
 
             AssetDatabase.SaveAssets();
         }
