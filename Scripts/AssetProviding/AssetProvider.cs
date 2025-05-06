@@ -554,6 +554,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             foreach (var groupRef in groupReferences)
             {
                 if (groupRef == null) continue;
+                AddressableEditorExtensions.EnsureAssetsAreAddressable(groupRef);
                 assetRefs.Clear();
                 foreach (var assetReferencePack in groupRef.editorAsset.SetAssetReferencePacks(assetRefs))
                 {
