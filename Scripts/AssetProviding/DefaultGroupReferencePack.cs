@@ -16,9 +16,10 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             set => assetPacks = value;
         }
         
-        public override void SetAssetReferencePacks(List<AssetReferencePack> references)
+        public override List<AssetReferencePack> SetAssetReferencePacks(List<AssetReferencePack> references)
         {
             foreach (var assetPack in assetPacks) references.Add(assetPack);
+            return references;
         }
         
         public virtual void TypeValidate() { }
@@ -48,7 +49,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                     Debug.LogWarning($"Asset at path '{path}' could not be loaded and will be skipped.");
                     continue;
                 }
-                instance.OnValidate();
+                instance.Validate();
             }
         }
 

@@ -43,6 +43,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     /// <summary> Пакет с мета-информацией об ассете и ссылкой на него. </summary>
     public abstract class GroupReferencePack : ScriptableObject
     {
-        public abstract void SetAssetReferencePacks(List<AssetReferencePack> references);
+        public abstract List<AssetReferencePack> SetAssetReferencePacks(List<AssetReferencePack> references);
     }
 }

@@ -73,7 +73,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             foreach (var guid in guids)
             {
-                Debug.Log(guid);
                 var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
 
                 if (path.Contains(iconName))

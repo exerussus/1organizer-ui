@@ -542,9 +542,31 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 #if UNITY_EDITOR
         /// <summary> Используется ТОЛЬКО в Editor </summary>
         [Button("Validate")]
-        public virtual void OnValidate()
+        public virtual void Validate()
         {
+            FixRefsAddressableGroups();
             FillUnusedPacks();
+        }
+
+        private void FixRefsAddressableGroups()
+        {
+            var assetRefs = new List<AssetReferencePack>();
+            foreach (var groupRef in groupReferences)
+            {
+                if (groupRef == null) continue;
+                assetRefs.Clear();
+                foreach (var assetReferencePack in groupRef.editorAsset.SetAssetReferencePacks(assetRefs))
+                {
+                    try
+                    {
+                        AddressableEditorExtensions.SyncReferenceToPackGroup(groupRef.editorAsset, assetReferencePack.Reference);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                    }
+                }
+            }
         }
         
         private void FillUnusedPacks()
