@@ -527,9 +527,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             Instance = this;
             OnBeforeInitialize();
             await InitializingAsync();
+            IsInitialized = true;
             OnInitialize();
         }
-        
+
+        public bool IsInitialized { get; protected set; }
+
         public void Initialize()
         {
             _ = InitializeAsync();
