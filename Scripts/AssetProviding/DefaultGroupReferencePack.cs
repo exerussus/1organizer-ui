@@ -59,7 +59,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             var duplicates = new HashSet<string>();
             var seen = new HashSet<string>();
         
-            foreach (var pack in assetPacks) if (!seen.Add(pack.Id)) duplicates.Add(pack.Id);
+            foreach (var pack in assetPacks) if (!seen.Add(pack.TypeId)) duplicates.Add(pack.TypeId);
         
             if (duplicates.Count > 0)
             {

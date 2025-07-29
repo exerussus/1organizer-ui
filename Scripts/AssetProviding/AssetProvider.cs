@@ -23,11 +23,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         /// <summary> Проинициализированные группы. </summary>
         [SerializeField, ReadOnly] protected List<GroupReferencePack> groups = new();
         
-        protected Dictionary<string, IAssetReferencePack> _assetPacks = new();
+        protected Dictionary<long, IAssetReferencePack> _assetPacks = new();
         //protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
-        protected Dictionary<string, List<IAssetReferencePack>> _typePacks = new();
-        protected Dictionary<string, AsyncOperationHandle> _assetPackHandles = new();
-        protected Dictionary<string, int> _assetPackReferenceCounts = new();
+        protected Dictionary<long, List<IAssetReferencePack>> _typePacks = new();
+        protected Dictionary<long, AsyncOperationHandle> _assetPackHandles = new();
+        protected Dictionary<long, int> _assetPackReferenceCounts = new();
         protected Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
         protected Dictionary<AssetReference, AsyncOperationHandle<GameObject>> _loadedPanelHandles = new();
         public List<GroupReferencePack> Groups => groups;
@@ -38,8 +38,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 #if UNITY_EDITOR
 
         private List<GroupReferencePack> Groups_EDITOR = new();
-        private Dictionary<string, AssetReferencePack> _assetPacks_EDITOR = new();
-        private Dictionary<string, List<AssetReferencePack>> _assetPacksByAssetType_EDITOR = new();
+        private Dictionary<long, AssetReferencePack> _assetPacks_EDITOR = new();
+        private Dictionary<long, List<AssetReferencePack>> _assetPacksByAssetType_EDITOR = new();
         private Dictionary<AssetReferencePack, GroupReferencePack> _groupsByAssetRefPack_EDITOR = new();
         
         /// <summary> Вызывать перед использованием TryGetGroupReferencePacks_Editor и TryGetAssetReferencePack_Editor. </summary>
@@ -64,20 +64,20 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             foreach (var assetReferencePack in tempAllAssetRefList)
             {
-                _assetPacks_EDITOR[assetReferencePack.Id] = assetReferencePack;
-                if (!_assetPacksByAssetType_EDITOR.ContainsKey(assetReferencePack.AssetType)) _assetPacksByAssetType_EDITOR[assetReferencePack.AssetType] = new();
-                _assetPacksByAssetType_EDITOR[assetReferencePack.AssetType].Add(assetReferencePack);
+                _assetPacks_EDITOR[assetReferencePack.ConvertId()] = assetReferencePack;
+                if (!_assetPacksByAssetType_EDITOR.ContainsKey(assetReferencePack.ConvertAssetType())) _assetPacksByAssetType_EDITOR[assetReferencePack.AssetTypeId] = new();
+                _assetPacksByAssetType_EDITOR[assetReferencePack.ConvertAssetType()].Add(assetReferencePack);
             }
         }
 
         /// <summary> Возвращает список AssetReferencePack по указанному asset type. </summary>
-        public bool TryGetAllAssetReferencePacksOfAssetType_Editor(string assetType, out List<AssetReferencePack> assetReferencePacks)
+        public bool TryGetAllAssetReferencePacksOfAssetType_Editor(long assetTypeId, out List<AssetReferencePack> assetReferencePacks)
         {
-            return _assetPacksByAssetType_EDITOR.TryGetValue(assetType, out assetReferencePacks);
+            return _assetPacksByAssetType_EDITOR.TryGetValue(assetTypeId, out assetReferencePacks);
         }
 
         /// <summary> Возвращает AssetReferencePack и GroupReferencePack по id. </summary>
-        public bool TryGetFullInfo_Editor(string id, out (AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack) info)
+        public bool TryGetFullInfo_Editor(long id, out (AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack) info)
         {
             if (!_assetPacks_EDITOR.TryGetValue(id, out var assetReferencePack))
             {
@@ -91,7 +91,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         /// <summary> Возвращает AssetReferencePack и GroupReferencePack по id, а так же приводит ассет к типу. </summary>
         /// <returns>found - найден ли ассет, success - приведён ли ассет к типу.</returns>
-        public (bool found, bool success) TryGetFullInfo_Editor<T>(string id, out (AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack, T asset) info)
+        public (bool found, bool success) TryGetFullInfo_Editor<T>(long id, out (AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack, T asset) info)
         {
             if (!_assetPacks_EDITOR.TryGetValue(id, out var assetReferencePack))
             {
@@ -121,11 +121,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         }
 
         /// <summary> Возвращает лист ассетов с приведением к типу, и лист некорректных референсов, которые не удалось привести к указанному типу. </summary>
-        public bool TryGetAllAssetsOfAssetType_Editor<T>(string assetType, 
+        public bool TryGetAllAssetsOfAssetType_Editor<T>(long assetTypeId, 
             out List<(string id, AssetReferencePack assetReferencePack, T asset)> assets,
             out List<(AssetReferencePack assetReferencePack, GroupReferencePack groupReferencePack)> invalidAssets)
         {
-            if (!_assetPacksByAssetType_EDITOR.TryGetValue(assetType, out var assetReferencePacks))
+            if (!_assetPacksByAssetType_EDITOR.TryGetValue(assetTypeId, out var assetReferencePacks))
             {
                 assets = null;
                 invalidAssets = null;
@@ -140,7 +140,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 foreach (var assetReferencePack in assetReferencePacks)
                 {
                     var sprite = GetFirstSpriteFromAssetReference(assetReferencePack.Reference);
-                    if (sprite != null && sprite is T t) assets.Add((assetReferencePack.Id, assetReferencePack, t));
+                    if (sprite != null && sprite is T t) assets.Add((assetReferencePack.TypeId, assetReferencePack, t));
                     else invalidAssets.Add((assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack]));
                 }
                 return assets.Count > 0;
@@ -148,7 +148,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             foreach (var assetReferencePack in assetReferencePacks)
             {
-                if (assetReferencePack.Reference.editorAsset is T asset) assets.Add((assetReferencePack.Id, assetReferencePack, asset));
+                if (assetReferencePack.Reference.editorAsset is T asset) assets.Add((assetReferencePack.TypeId, assetReferencePack, asset));
                 else invalidAssets.Add((assetReferencePack, _groupsByAssetRefPack_EDITOR[assetReferencePack]));
             }
             
@@ -171,7 +171,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         }
 
         /// <summary> Ищет AssetReferencePack по id. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
-        public bool TryGetAssetReferencePack_Editor(string id, out AssetReferencePack assetReferencePack)
+        public bool TryGetAssetReferencePack_Editor(long id, out AssetReferencePack assetReferencePack)
         {
             if (Groups_EDITOR.Count == 0) RefreshReferences_Editor();
             
@@ -179,7 +179,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         }
 
         /// <summary> Ищет ассет по id и указанию типа. Перед использованием требуется вызвать RefreshReferences_Editor для актуализации ассетов. </summary>
-        public bool TryGetAsset_Editor<T>(string id, out T asset) where T : Object
+        public bool TryGetAsset_Editor<T>(long id, out T asset) where T : Object
         {
             if (Groups_EDITOR.Count == 0) RefreshReferences_Editor();
             
@@ -268,19 +268,19 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
                 foreach (var assetReferencePack in tempAssetPacksList)
                 {
-                    if (!_typePacks.TryGetValue(assetReferencePack.AssetType, out var packList))
+                    if (!_typePacks.TryGetValue(assetReferencePack.ConvertAssetType(), out var packList))
                     {
                         packList = new List<IAssetReferencePack>();
-                        _typePacks.Add(assetReferencePack.AssetType, packList);
+                        _typePacks.Add(assetReferencePack.AssetTypeId, packList);
                     }
 
                     packList.Add(assetReferencePack);
-                    if (!_assetPacks.TryAdd(assetReferencePack.Id, assetReferencePack))
+                    if (!_assetPacks.TryAdd(assetReferencePack.ConvertId(), assetReferencePack))
                     {
-                        Debug.LogError($"Duplicate AssetPack ID detected: {assetReferencePack.Id}", group);
-                        Debug.LogError($"Already exist AssetPack >>> ping", dict[assetReferencePack.Id]);
+                        Debug.LogError($"Duplicate AssetPack ID detected: {assetReferencePack.TypeId}", group);
+                        Debug.LogError($"Already exist AssetPack >>> ping", dict[assetReferencePack.TypeId]);
                     }
-                    else dict.Add(assetReferencePack.Id, group);
+                    else dict.Add(assetReferencePack.TypeId, group);
                 }
             }
 
@@ -288,7 +288,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             IsLoaded = true;
         }
 
-        public bool TryGetMetaInfo<T>(string id, out T info) where T : ScriptableObject
+        public bool TryGetMetaInfo<T>(long id, out T info) where T : ScriptableObject
         {
             if (TryGetAssetPack(id, out var resultPack))
             {
@@ -299,22 +299,22 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return false;
         }
         
-        public List<IAssetReferencePack> GetPacksByType(string type)
+        public List<IAssetReferencePack> GetPacksByType(long type)
         {
             return _typePacks.TryGetValue(type, out var packs) ? packs : new List<IAssetReferencePack>();
         }
 
-        public IAssetReferencePack GetPack(string id)
+        public IAssetReferencePack GetPack(long id)
         {
             return _assetPacks[id];
         }
 
-        public bool TryGetPack(string id, out IAssetReferencePack assetReferencePack)
+        public bool TryGetPack(long id, out IAssetReferencePack assetReferencePack)
         {
             return _assetPacks.TryGetValue(id, out assetReferencePack);
         }
         
-        public async Task<T> LoadAssetPackAsync<T>(string packId) where T : UnityEngine.Object
+        public async Task<T> LoadAssetPackAsync<T>(long packId) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
@@ -350,7 +350,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             }
         }
         
-        public async Task<(bool, VfxPack)> TryLoadVfxPackAsync(string packId)
+        public async Task<(bool, VfxPack)> TryLoadVfxPackAsync(long packId)
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
@@ -386,7 +386,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return (false, null);
         }
         
-        public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(string packId, Action<string, LogType> messageCallback) where T : UnityEngine.Object
+        public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(long packId, Action<string, LogType> messageCallback) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
@@ -426,12 +426,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return (false, null);
         }
 
-        public bool TryGetAssetPack(string packId, out IAssetReferencePack resultPack)
+        public bool TryGetAssetPack(long packId, out IAssetReferencePack resultPack)
         {
             return _assetPacks.TryGetValue(packId, out resultPack);
         }  
         
-        public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(string packId) where T : UnityEngine.Object
+        public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(long packId) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
@@ -469,7 +469,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return (false, null);
         }
 
-        public void UnloadAssetPack(string packId)
+        public void UnloadAssetPack(long packId)
         {
             if (!_assetPackHandles.TryGetValue(packId, out var handle))
             {

@@ -11,7 +11,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
     [Serializable]
     public abstract class UiModule : IInjectable
     {
-        public string Name => _assetReferencePack.Id;
+        public long Id => _assetReferencePack.Id;
+        public string Name => _assetReferencePack.TypeId;
         public string Group { get => _panelUiMetaInfo.group; protected set => _panelUiMetaInfo.group = value; }
         public int Order { get => _panelUiMetaInfo.order; protected set => _panelUiMetaInfo.order = value; }
         public IObjectUI UIObject { get; private set; }
@@ -32,6 +33,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             OnInjectSharedData(gameShare);
         }
         
+        public long ConvertId() => _assetReferencePack.ConvertId();
         public virtual void OnInjectSharedData(GameShare gameShare) {}
         
         public virtual void Hide()
@@ -122,7 +124,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
+           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Id);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
@@ -143,7 +145,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
+           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Id);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
@@ -165,7 +167,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _parent = transform;
            _isLoading = true;
            
-           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Name);
+           var (result, asset) = await _assetProvider.TryLoadAssetPackContentAsync<GameObject>(Id);
            if (!result) return;
            
            _loadedInstance = Object.Instantiate(asset, _parent);
@@ -189,7 +191,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 Object.Destroy(_loadedInstance);
                 _loadedInstance = null;
-                _assetProvider.UnloadAssetPack(Name);
+                _assetProvider.UnloadAssetPack(Id);
             }
         }
 

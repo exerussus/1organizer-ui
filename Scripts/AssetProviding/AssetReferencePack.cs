@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
+using Exerussus._1Extensions.SmallFeatures;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Serialization;
 
 namespace Source.Scripts.Global.Managers.AssetManagement
 {
     [Serializable]
     public class AssetReferencePack : IAssetReferencePack
     {
-        public string id;
+        [FormerlySerializedAs("id")] public string typeId;
 #if UNITY_EDITOR
         [ValueDropdown("AssetTypeValues")] 
 #endif
@@ -28,11 +30,26 @@ namespace Source.Scripts.Global.Managers.AssetManagement
         private static List<string> AssetTypeValues => AssetProviderSettings.GetInstanceEditor().AssetTypes;
         private static List<string> TagValues => AssetProviderSettings.GetInstanceEditor().Tags; 
 #endif
+
+        public long Id {get; private set;}
+        public long AssetTypeId {get; private set;}
         
-        public string Id
+        public long ConvertId()
         {
-            get => id;
-            set => id = value;
+            Id = typeId.GetStableLongId();
+            return Id;
+        }
+        
+        public long ConvertAssetType()
+        {
+            AssetTypeId = assetType.GetStableLongId();
+            return AssetTypeId;
+        }
+        
+        public string TypeId
+        {
+            get => typeId;
+            set => typeId = value;
         }
 
         public string AssetType

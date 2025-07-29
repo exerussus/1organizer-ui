@@ -10,11 +10,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private bool _isLoaded;
         private bool _isLoadingProcessStarted;
 
-        public string Id { get; private set; }
+        public long Id { get; private set; }
         public bool IsValid { get; private set; } = true;
         private readonly object _lock = new();
         
-        public async Task<(bool result, T asset)> Load(string id)
+        public async Task<(bool result, T asset)> Load(long id)
         {
             if (!IsValid) return (false, null);
             if (id == Id && _asset != null) return (_isLoaded, _asset);
@@ -49,7 +49,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             {
                 lock (_lock)
                 {
-                    if (!_isLoaded) Id = string.Empty;
+                    if (!_isLoaded) Id = 0;
                     _isLoadingProcessStarted = false;
                 }
             }

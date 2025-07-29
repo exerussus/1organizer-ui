@@ -20,9 +20,9 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         [SerializeField] protected List<string> disabledModules = new();
         [SerializeField] protected Transform _parentTransform;
         
-        private readonly HashSet<string> _enabledModules = new();
-        private readonly HashSet<string> _disabledModules = new();
-        private Dictionary<string, TModule> _modulesDict;
+        private readonly HashSet<long> _enabledModules = new();
+        private readonly HashSet<long> _disabledModules = new();
+        private Dictionary<long, TModule> _modulesDict;
         private Dictionary<string, List<TModule>> _groupsDict;
 
         public abstract IAssetProvider AssetProvider { get; }
@@ -58,7 +58,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
             await TaskUtils.WaitUntilAsync(() => AssetProvider.IsLoaded);
 
-            var allPacks = AssetProvider.GetPacksByType(AssetProviding.AssetConstants.UiPanel);
+            var allPacks = AssetProvider.GetPacksByType(AssetConstants.UiPanelId);
             if (allPacks.Count > 0)
             {
                 foreach (var panelUiPack in allPacks)
@@ -70,7 +70,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                     handle.panelUiMetaInfo = metaInfo;
                     handle.assetReferencePack = panelUiPack;
                     modules.Add(newModule);
-                    _modulesDict[panelUiPack.Id] = newModule;
+                    _modulesDict[panelUiPack.ConvertId()] = newModule;
                     OnPanelUiPackApply(handle, panelUiPack, metaInfo);
                 }
             }
@@ -81,7 +81,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             foreach (var uiModule in modules)
             {
-                _modulesDict[uiModule.Name] = uiModule;
+                _modulesDict[uiModule.Id] = uiModule;
                 
                 if (_groupsDict.ContainsKey(uiModule.Group)) _groupsDict[uiModule.Group].Add(uiModule);
                 else _groupsDict.Add(uiModule.Group, new List<TModule> { uiModule });
@@ -91,8 +91,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             foreach (var uiModule in modules)
             {
-                if (_enabledModules.Contains(uiModule.Name)) _ =  uiModule.ShowAsync(shareData, _parentTransform);
-                else _disabledModules.Add(uiModule.Name);
+                if (_enabledModules.Contains(uiModule.ConvertId())) _ =  uiModule.ShowAsync(shareData, _parentTransform);
+                else _disabledModules.Add(uiModule.ConvertId());
             }
         }
 
@@ -118,106 +118,110 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         
         protected virtual void OnSort() {}
         
-        private void MoveToEnabledList(string uiName)
+        private void MoveToEnabledList(long moduleId)
         {
-            if (_disabledModules.Contains(uiName))
+            if (_disabledModules.Contains(moduleId))
             {
-                _disabledModules.Remove(uiName);
-                _enabledModules.Add(uiName);
-                enabledModules = new List<string>(_enabledModules);
-                disabledModules = new List<string>(_disabledModules);
+                _disabledModules.Remove(moduleId);
+                _enabledModules.Add(moduleId);
+                enabledModules.Clear();
+                disabledModules.Clear();
+                foreach (var id in _enabledModules) enabledModules.Add(id.ToStringFromStableId());
+                foreach (var id in _disabledModules) disabledModules.Add(id.ToStringFromStableId());
             }
         }
 
-        private void MoveToDisabledList(string uiName)
+        private void MoveToDisabledList(long moduleId)
         {
-            if (_enabledModules.Contains(uiName))
+            if (_enabledModules.Contains(moduleId))
             {
-                _enabledModules.Remove(uiName);
-                _disabledModules.Add(uiName);
-                enabledModules = new List<string>(_enabledModules);
-                disabledModules = new List<string>(_disabledModules);
+                _enabledModules.Remove(moduleId);
+                _disabledModules.Add(moduleId);
+                enabledModules.Clear();
+                disabledModules.Clear();
+                foreach (var id in _enabledModules) enabledModules.Add(id.ToStringFromStableId());
+                foreach (var id in _disabledModules) disabledModules.Add(id.ToStringFromStableId());
             }
         }
 
-        public void ShowModule(string uiName)
+        public void ShowModule(long moduleId)
         {
-            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            if (_modulesDict.TryGetValue(moduleId, out var uiModule))
             {
-                if (_enabledModules.Contains(uiName))
+                if (_enabledModules.Contains(moduleId))
                 {
                     uiModule.UpdateModule();
                     return;
                 }
                 
-                MoveToEnabledList(uiModule.Name);
+                MoveToEnabledList(moduleId);
                 uiModule.Show(shareData, _parentTransform);
             }
         }
 
-        public void ShowModule(string uiName, Action onLoad)
+        public void ShowModule(long moduleId, Action onLoad)
         {
-            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            if (_modulesDict.TryGetValue(moduleId, out var uiModule))
             {
-                if (_enabledModules.Contains(uiName))
+                if (_enabledModules.Contains(moduleId))
                 {
                     uiModule.UpdateModule();
                     return;
                 }
                 
-                MoveToEnabledList(uiModule.Name);
+                MoveToEnabledList(moduleId);
                 uiModule.Show(shareData, _parentTransform, onLoad);
             }
         }
 
-        public void ShowModule(string uiName, Action<GameObject> onLoad)
+        public void ShowModule(long moduleId, Action<GameObject> onLoad)
         {
-            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            if (_modulesDict.TryGetValue(moduleId, out var uiModule))
             {
-                if (_enabledModules.Contains(uiName))
+                if (_enabledModules.Contains(moduleId))
                 {
                     uiModule.UpdateModule();
                     return;
                 }
                 
-                MoveToEnabledList(uiModule.Name);
+                MoveToEnabledList(moduleId);
                 uiModule.Show(shareData, _parentTransform, onLoad);
             }
         }
 
-        public async Task ShowModuleAsync(string uiName)
+        public async Task ShowModuleAsync(long moduleId)
         {
-            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            if (_modulesDict.TryGetValue(moduleId, out var uiModule))
             {
-                if (_enabledModules.Contains(uiName))
+                if (_enabledModules.Contains(moduleId))
                 {
                     uiModule.UpdateModule();
                     return;
                 }
                 
-                MoveToEnabledList(uiModule.Name);
+                MoveToEnabledList(moduleId);
                 await uiModule.ShowAsync(shareData, _parentTransform);
             }
         }
 
-        public void HideModule(string uiName)
+        public void HideModule(long moduleId)
         {
-            if (_disabledModules.Contains(uiName)) return;
-            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            if (_disabledModules.Contains(moduleId)) return;
+            if (_modulesDict.TryGetValue(moduleId, out var uiModule))
             {
-                MoveToDisabledList(uiModule.Name);
+                MoveToDisabledList(moduleId);
                 uiModule.Hide();
             }
         }
 
-        public TModule GetModule(string uiName)
+        public TModule GetModule(long moduleId)
         {
-            return _modulesDict[uiName];
+            return _modulesDict[moduleId];
         }
 
-        public bool TryGetModule(string uiName, out TModule module)
+        public bool TryGetModule(long moduleId, out TModule module)
         {
-            if (_modulesDict.TryGetValue(uiName, out TModule resultModule))
+            if (_modulesDict.TryGetValue(moduleId, out TModule resultModule))
             {
                 module = resultModule;
                 return true;
@@ -233,20 +237,20 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             foreach (var uiModule in group)
             {
-                if (_disabledModules.Contains(uiModule.Name)) continue;
+                if (_disabledModules.Contains(uiModule.Id)) continue;
 
-                MoveToDisabledList(uiModule.Name);
+                MoveToDisabledList(uiModule.Id);
                 uiModule.Hide();
             }
         }
         
-        public void UnloadModule(string uiName)
+        public void UnloadModule(long moduleId)
         {
-            if (_modulesDict.TryGetValue(uiName, out var uiModule))
+            if (_modulesDict.TryGetValue(moduleId, out var uiModule))
             {
-                if (_enabledModules.Contains(uiModule.Name))
+                if (_enabledModules.Contains(moduleId))
                 {
-                    MoveToDisabledList(uiModule.Name);
+                    MoveToDisabledList(moduleId);
                     uiModule.Hide();
                 }
                 uiModule.Unload();
@@ -257,18 +261,18 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         {
             if (_groupsDict.TryGetValue(groupName, out var group)) foreach (var uiModule in group)
             {
-                if (_enabledModules.Contains(uiModule.Name))
+                if (_enabledModules.Contains(uiModule.Id))
                 {
-                    MoveToDisabledList(uiModule.Name);
+                    MoveToDisabledList(uiModule.Id);
                     uiModule.Hide();
                 }
                 uiModule.Unload();
             }
         }
         
-        public void UpdateModule(string uiName)
+        public void UpdateModule(long moduleId)
         {
-            if (_modulesDict.TryGetValue(uiName, out var uiModule)) uiModule.UpdateModule();
+            if (_modulesDict.TryGetValue(moduleId, out var uiModule)) uiModule.UpdateModule();
         }
 
         public void UpdateGroup(string groupName)
@@ -280,14 +284,14 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         {
             if(_groupsDict.TryGetValue(groupName, out var group)) foreach (var uiModule in group)
             {
-                MoveToEnabledList(uiModule.Name);
+                MoveToEnabledList(uiModule.Id);
                 uiModule.Show(shareData, _parentTransform);
             }
         }
 
-        public bool IsEnabledModule(string uiName)
+        public bool IsEnabledModule(long moduleId)
         {
-            return _enabledModules.Contains(uiName);
+            return _enabledModules.Contains(moduleId);
         }
 
         protected virtual void PreInitialize() {}
