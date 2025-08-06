@@ -27,7 +27,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         //protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
         protected Dictionary<long, List<IAssetReferencePack>> _typePacks = new();
         protected Dictionary<long, AsyncOperationHandle> _assetPackHandles = new();
-        protected Dictionary<long, int> _assetPackReferenceCounts = new();
         protected Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
         protected Dictionary<AssetReference, AsyncOperationHandle<GameObject>> _loadedPanelHandles = new();
         public List<GroupReferencePack> Groups => groups;
@@ -318,9 +317,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
-                if (_assetPackReferenceCounts.ContainsKey(packId)) _assetPackReferenceCounts[packId]++;
-                else _assetPackReferenceCounts[packId] = 1;
-
                 if (handle.Status == AsyncOperationStatus.Succeeded) return handle.Result as T;
                 await handle.Task;
 
@@ -337,7 +333,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             var newHandle = assetPack.Reference.LoadAssetAsync<T>();
             _assetPackHandles.Add(packId, newHandle);
-            _assetPackReferenceCounts[packId] = 1;
             await newHandle.Task;
 
             if (newHandle.Status == AsyncOperationStatus.Succeeded) return newHandle.Result;
@@ -345,7 +340,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             {
                 Debug.LogError($"Failed to load AssetPack with ID: {packId}");
                 _assetPackHandles.Remove(packId);
-                _assetPackReferenceCounts.Remove(packId);
                 return null;
             }
         }
@@ -354,9 +348,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
-                if (_assetPackReferenceCounts.ContainsKey(packId)) _assetPackReferenceCounts[packId]++;
-                else _assetPackReferenceCounts[packId] = 1;
-
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as VfxPack);
                 await handle.Task;
 
@@ -374,7 +365,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             var newHandle = assetPack.Reference.LoadAssetAsync<VfxPack>();
             _assetPackHandles.Add(packId, newHandle);
-            _assetPackReferenceCounts[packId] = 1;
             await newHandle.Task;
 
             if (newHandle.Status == AsyncOperationStatus.Succeeded)
@@ -382,7 +372,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             Debug.LogError($"Failed to load AssetPack with ID: {packId}");
             _assetPackHandles.Remove(packId);
-            _assetPackReferenceCounts.Remove(packId);
             return (false, null);
         }
         
@@ -390,9 +379,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
-                if (_assetPackReferenceCounts.ContainsKey(packId)) _assetPackReferenceCounts[packId]++;
-                else _assetPackReferenceCounts[packId] = 1;
-
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as T);
                 await handle.Task;
 
@@ -411,7 +397,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             var newHandle = assetPack.Reference.LoadAssetAsync<T>();
             _assetPackHandles.Add(packId, newHandle);
-            _assetPackReferenceCounts[packId] = 1;
             await newHandle.Task;
 
             if (newHandle.Status == AsyncOperationStatus.Succeeded)
@@ -422,7 +407,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             messageCallback.Invoke($"Failed to load AssetPack with ID: {packId}", LogType.Error);
             _assetPackHandles.Remove(packId);
-            _assetPackReferenceCounts.Remove(packId);
             return (false, null);
         }
 
@@ -435,9 +419,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
-                if (_assetPackReferenceCounts.ContainsKey(packId)) _assetPackReferenceCounts[packId]++;
-                else _assetPackReferenceCounts[packId] = 1;
-
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as T);
                 await handle.Task;
 
@@ -457,7 +438,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             var newHandle = assetPack.Reference.LoadAssetAsync<T>();
             _assetPackHandles.Add(packId, newHandle);
-            _assetPackReferenceCounts[packId] = 1;
             await newHandle.Task;
 
             if (newHandle.Status == AsyncOperationStatus.Succeeded)
@@ -465,7 +445,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             Debug.LogError($"Failed to load AssetPack with ID: {packId}");
             _assetPackHandles.Remove(packId);
-            _assetPackReferenceCounts.Remove(packId);
             return (false, null);
         }
 
@@ -477,21 +456,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 return;
             }
 
-            if (_assetPackReferenceCounts.TryGetValue(packId, out var count))
-            {
-                count--;
-                if (count <= 0)
-                {
-                    Addressables.Release(handle);
-                    _assetPackHandles.Remove(packId);
-                    _assetPackReferenceCounts.Remove(packId);
-                }
-                else _assetPackReferenceCounts[packId] = count;
-            }
-            else
-            {
-                Debug.LogWarning($"Reference count for AssetPack with ID {packId} was not found.");
-            }
+            Addressables.Release(handle);
         }
 
         protected void Clear()
@@ -515,7 +480,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             groups.Clear();
             _assetPacks.Clear();
             _typePacks.Clear();
-            _assetPackReferenceCounts.Clear();
             _assetPackHandles.Clear();
             //_uiPanelsDict.Clear();
             _loadedHandles.Clear();
