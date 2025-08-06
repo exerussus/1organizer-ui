@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Exerussus._1Extensions.Scripts.Extensions;
 using Sirenix.OdinInspector;
 using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
@@ -415,7 +416,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return _assetPacks.TryGetValue(packId, out resultPack);
         }  
         
-        public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(long packId) where T : UnityEngine.Object
+        public async Task<(bool isLoaded, T asset)> TryLoadAssetPackContentAsync<T>(long packId) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
@@ -450,7 +451,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         public void UnloadAssetPack(long packId)
         {
-            if (!_assetPackHandles.TryGetValue(packId, out var handle))
+            if (!_assetPackHandles.TryPop(packId, out var handle))
             {
                 Debug.LogWarning($"Attempted to unload AssetPack with ID {packId}, but it was not loaded.");
                 return;

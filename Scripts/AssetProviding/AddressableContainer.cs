@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Exerussus._1Extensions.SmallFeatures;
 using UnityEngine;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
@@ -27,6 +28,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private Dictionary<long, AddressableLoader> _loadersDict = new();
         private Dictionary<long, SpriteLoader> _spritesDict = new();
         private Dictionary<long, GameObjectLoader> _gameObjectsDict = new();
+        private HashSet<SpriteRenderer> _spriteRenderers = new();
+        private HashSet<Image> _imageRenderers = new();
 
         public AssetProvider AssetProvider => _assetProvider;
 
@@ -79,6 +82,30 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             return pack.loadedSprite;
         }
+        
+        public async Task<(bool isLoaded, Sprite sprite)> TryLoadSprite(long id)
+        {
+            if (!_spritesDict.TryGetValue(id, out var pack))
+            {
+                var result = await _assetProvider.TryLoadAssetPackContentAsync<Sprite>(id);
+
+                if (!result.isLoaded) return result;
+                
+                pack = new SpriteLoader
+                {
+                    id = id,
+                    loadedSprite = result.asset
+#if UNITY_EDITOR
+                    , name = id.ToStringFromStableId()
+#endif
+                };
+                
+                _spritesDict[id] = pack;
+                spriteLoaders.Add(pack);
+            }
+            
+            return (true, pack.loadedSprite);
+        }
 
         #endregion
 
@@ -108,10 +135,72 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #endregion
 
+        #region To Renderer Loading 
+
+        public async Task<bool> LoadToImage(long id, Image image)
+        {
+            if (!_spritesDict.TryGetValue(id, out var pack))
+            {
+                var result = await _assetProvider.TryLoadAssetPackContentAsync<Sprite>(id);
+
+                if (!result.isLoaded) return false;
+                
+                pack = new SpriteLoader
+                {
+                    id = id,
+                    loadedSprite = result.asset
+#if UNITY_EDITOR
+                    , name = id.ToStringFromStableId()
+#endif
+                };
+                
+                _spritesDict[id] = pack;
+                spriteLoaders.Add(pack);
+            }
+            
+            _imageRenderers.Add(image);
+            image.sprite = pack.loadedSprite;
+            return true;
+        }
+        
+        public async Task<bool> LoadToSpriteRenderer(long id, SpriteRenderer spriteRenderer)
+        {            
+            if (!_spritesDict.TryGetValue(id, out var pack))
+            {
+                var result = await _assetProvider.TryLoadAssetPackContentAsync<Sprite>(id);
+
+                if (!result.isLoaded) return false;
+                
+                pack = new SpriteLoader
+                {
+                    id = id,
+                    loadedSprite = result.asset
+#if UNITY_EDITOR
+                    , name = id.ToStringFromStableId()
+#endif
+                };
+                
+                _spritesDict[id] = pack;
+                spriteLoaders.Add(pack);
+            }
+            
+            _spriteRenderers.Add(spriteRenderer);
+            spriteRenderer.sprite = pack.loadedSprite;
+            return true;
+        }
+
+        #endregion
+        
         #region Unloading
 
         public void Unload()
         {
+            foreach (var spriteRenderer in _spriteRenderers) if (spriteRenderer != null) spriteRenderer.sprite = null;
+            foreach (var imageRenderer in _imageRenderers) if (imageRenderer != null) imageRenderer.sprite = null;
+            
+            _spriteRenderers.Clear();
+            _imageRenderers.Clear();
+            
             foreach (var loader in _loadersDict.Values)
             {
                 _assetProvider.UnloadAssetPack(loader.id);
