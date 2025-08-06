@@ -51,7 +51,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 };
                 
                 _loadersDict[id] = pack;
+#if UNITY_EDITOR
                 assetLoaders.Add(pack);
+#endif
             }
             
             return pack.loadedObject as T;
@@ -77,7 +79,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 };
                 
                 _spritesDict[id] = pack;
+#if UNITY_EDITOR
                 spriteLoaders.Add(pack);
+#endif
             }
             
             return pack.loadedSprite;
@@ -101,7 +105,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 };
                 
                 _spritesDict[id] = pack;
+#if UNITY_EDITOR
                 spriteLoaders.Add(pack);
+#endif
             }
             
             return (true, pack.loadedSprite);
@@ -127,7 +133,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 };
                 
                 _gameObjectsDict[id] = pack;
+#if UNITY_EDITOR
                 gameObjectLoaders.Add(pack);
+#endif
             }
             
             return pack.loadedObject;
@@ -155,7 +163,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 };
                 
                 _spritesDict[id] = pack;
+#if UNITY_EDITOR
                 spriteLoaders.Add(pack);
+#endif
             }
             
             _imageRenderers.Add(image);
@@ -181,7 +191,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 };
                 
                 _spritesDict[id] = pack;
+#if UNITY_EDITOR
                 spriteLoaders.Add(pack);
+#endif
             }
             
             _spriteRenderers.Add(spriteRenderer);
