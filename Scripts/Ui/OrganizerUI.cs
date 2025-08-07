@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Exerussus._1Extensions.Async;
 using Exerussus._1Extensions.SmallFeatures;
+using Exerussus._1Extensions.ThreadGateFeature;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine;
 
@@ -26,7 +27,6 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         private Dictionary<string, List<TModule>> _groupsDict;
 
         public abstract IAssetProvider AssetProvider { get; }
-        public abstract JobHandler JobHandler { get; }
 
         public Transform ParentTransform
         {
@@ -77,7 +77,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
             foreach (var uiModule in modules) uiModule.Inject(shareData);
             
-            await JobHandler.AddJobAsync(PreInitialize);
+            var jobPreInitializeHandle = ThreadGate.CreateJob(PreInitialize).Run();
+            await jobPreInitializeHandle.Wait();
             
             foreach (var uiModule in modules)
             {
@@ -87,7 +88,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 else _groupsDict.Add(uiModule.Group, new List<TModule> { uiModule });
             }
 
-            await JobHandler.AddJobAsync(OnInitialize);
+            var jobOnInitializeHandle = ThreadGate.CreateJob(OnInitialize).Run();
+            await jobOnInitializeHandle.Wait();
             
             foreach (var uiModule in modules)
             {
