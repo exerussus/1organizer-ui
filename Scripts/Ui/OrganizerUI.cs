@@ -77,7 +77,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
             foreach (var uiModule in modules) uiModule.Inject(shareData);
             
-            await JobHandler.AddJobAsync(PreInitialize, "OrganizerUI.PreInitialize");
+            await JobHandler.AddJobAsync(PreInitialize);
             
             foreach (var uiModule in modules)
             {
@@ -87,7 +87,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 else _groupsDict.Add(uiModule.Group, new List<TModule> { uiModule });
             }
 
-            await JobHandler.AddJobAsync(OnInitialize, "OrganizerUI.OnInitialize");
+            await JobHandler.AddJobAsync(OnInitialize);
             
             foreach (var uiModule in modules)
             {
