@@ -11,9 +11,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     public interface IAssetProvider : IInitializable
     {
         public List<IAssetReferencePack> GetPacksByType(long type);
-        //public Task<(bool result, GameObject panelUi)> TryLoadUiPanelAsync(string packId);
-        //public void UnloadUiPanel(string packId);
-        //public List<PanelUiPack> GetAllPanelUiPacks();
         public IAssetReferencePack GetPack(long id);
         public bool TryGetPack(long id, out IAssetReferencePack assetReferencePack);
         public UniTask<T> LoadAssetPackAsync<T>(long packId) where T : UnityEngine.Object;

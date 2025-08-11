@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Exerussus._1Extensions.SmallFeatures;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,7 +35,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #region Universal Loading
 
-        public async Task<T> LoadAsset<T>(long id) where T : Object
+        public async UniTask<T> LoadAsset<T>(long id) where T : Object
         {
             if (!_loadersDict.TryGetValue(id, out var pack))
             {
@@ -63,7 +63,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #region Sprite Loading
 
-        public async Task<Sprite> LoadSprite(long id)
+        public async UniTask<Sprite> LoadSprite(long id)
         {
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
@@ -87,7 +87,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return pack.loadedSprite;
         }
         
-        public async Task<(bool isLoaded, Sprite sprite)> TryLoadSprite(long id)
+        public async UniTask<(bool isLoaded, Sprite sprite)> TryLoadSprite(long id)
         {
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
@@ -117,7 +117,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #region GameObject Loading
 
-        public async Task<GameObject> LoadGameObject(long id)
+        public async UniTask<GameObject> LoadGameObject(long id)
         {
             if (!_gameObjectsDict.TryGetValue(id, out var pack))
             {
@@ -145,7 +145,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #region To Renderer Loading 
 
-        public async Task<bool> LoadToImage(long id, Image image)
+        public async UniTask<bool> LoadToImage(long id, Image image)
         {
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
@@ -173,7 +173,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return true;
         }
         
-        public async Task<bool> LoadToSpriteRenderer(long id, SpriteRenderer spriteRenderer)
+        public async UniTask<bool> LoadToSpriteRenderer(long id, SpriteRenderer spriteRenderer)
         {            
             if (!_spritesDict.TryGetValue(id, out var pack))
             {

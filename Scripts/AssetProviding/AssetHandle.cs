@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
@@ -14,7 +14,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         public bool IsValid { get; private set; } = true;
         private readonly object _lock = new();
         
-        public async Task<(bool result, T asset)> Load(long id)
+        public async UniTask<(bool result, T asset)> Load(long id)
         {
             if (!IsValid) return (false, null);
             if (id == Id && _asset != null) return (_isLoaded, _asset);
