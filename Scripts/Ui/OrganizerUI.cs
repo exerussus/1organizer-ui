@@ -78,7 +78,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             foreach (var uiModule in modules) uiModule.Inject(shareData);
             
             var jobPreInitializeHandle = ThreadGate.CreateJob(PreInitialize).Run();
-            await jobPreInitializeHandle.Wait();
+            await jobPreInitializeHandle.AsTask();
             
             foreach (var uiModule in modules)
             {
@@ -89,7 +89,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
 
             var jobOnInitializeHandle = ThreadGate.CreateJob(OnInitialize).Run();
-            await jobOnInitializeHandle.Wait();
+            await jobOnInitializeHandle.AsTask();
             
             foreach (var uiModule in modules)
             {
