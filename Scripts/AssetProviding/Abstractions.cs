@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Exerussus._1Extensions.Abstractions;
 using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
@@ -16,9 +16,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         //public List<PanelUiPack> GetAllPanelUiPacks();
         public IAssetReferencePack GetPack(long id);
         public bool TryGetPack(long id, out IAssetReferencePack assetReferencePack);
-        public Task<T> LoadAssetPackAsync<T>(long packId) where T : UnityEngine.Object;
-        public Task<(bool result, VfxPack vfxPack)> TryLoadVfxPackAsync(long packId);
-        public Task<(bool isLoaded, T asset)> TryLoadAssetPackContentAsync<T>(long packId) where T : UnityEngine.Object;
+        public UniTask<T> LoadAssetPackAsync<T>(long packId) where T : UnityEngine.Object;
+        public UniTask<(bool result, VfxPack vfxPack)> TryLoadVfxPackAsync(long packId);
+        public UniTask<(bool isLoaded, T asset)> TryLoadAssetPackContentAsync<T>(long packId) where T : UnityEngine.Object;
         public void UnloadAssetPack(long packId);        
         public void OnBeforeInitialize() {}
         public void OnInitialize() {}

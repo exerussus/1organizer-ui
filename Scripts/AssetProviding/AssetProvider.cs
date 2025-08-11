@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Exerussus._1Extensions.Scripts.Extensions;
 using Sirenix.OdinInspector;
 using Source.Scripts.Global.Managers.AssetManagement;
@@ -25,7 +25,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         [SerializeField, ReadOnly] protected List<GroupReferencePack> groups = new();
         
         protected Dictionary<long, IAssetReferencePack> _assetPacks = new();
-        //protected Dictionary<string, PanelUiPack> _uiPanelsDict = new();
         protected Dictionary<long, List<IAssetReferencePack>> _typePacks = new();
         protected Dictionary<long, AsyncOperationHandle> _assetPackHandles = new();
         protected Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
@@ -227,22 +226,22 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
 #endif
         
-        private async Task InitializingAsync()
+        private async UniTask InitializingAsync()
         {
             Clear();
             Instance = this;
             var handles = new List<AsyncOperationHandle<GroupReferencePack>>();
-            var taskArray = new Task<GroupReferencePack>[groupReferences.Count];
+            var taskArray = new UniTask[groupReferences.Count];
 
             for (var index = 0; index < groupReferences.Count; index++)
             {
                 var groupRef = groupReferences[index];
-                var handle = groupRef.LoadAssetAsync();
+                var handle = groupRef.LoadAssetAsync<GroupReferencePack>();
                 handles.Add(handle);
-                taskArray[index] = handle.Task;
+                taskArray[index] = handle.ToUniTask();
             }
 
-            await Task.WhenAll(taskArray);
+            await UniTask.WhenAll(taskArray);
 
             for (var index = 0; index < handles.Count; index++)
             {
@@ -314,12 +313,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return _assetPacks.TryGetValue(id, out assetReferencePack);
         }
         
-        public async Task<T> LoadAssetPackAsync<T>(long packId) where T : UnityEngine.Object
+        public async UniTask<T> LoadAssetPackAsync<T>(long packId) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
                 if (handle.Status == AsyncOperationStatus.Succeeded) return handle.Result as T;
-                await handle.Task;
+                await handle.ToUniTask();
 
                 if (handle.Status == AsyncOperationStatus.Succeeded) return handle.Result as T;
                 Debug.LogError($"Failed to load AssetPack with ID: {packId}");
@@ -334,7 +333,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             var newHandle = assetPack.Reference.LoadAssetAsync<T>();
             _assetPackHandles.Add(packId, newHandle);
-            await newHandle.Task;
+            await newHandle.ToUniTask();
 
             if (newHandle.Status == AsyncOperationStatus.Succeeded) return newHandle.Result;
             else
@@ -345,12 +344,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             }
         }
         
-        public async Task<(bool, VfxPack)> TryLoadVfxPackAsync(long packId)
+        public async UniTask<(bool, VfxPack)> TryLoadVfxPackAsync(long packId)
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as VfxPack);
-                await handle.Task;
+                await handle.ToUniTask();
 
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as VfxPack);
 
@@ -366,7 +365,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
             var newHandle = assetPack.Reference.LoadAssetAsync<VfxPack>();
             _assetPackHandles.Add(packId, newHandle);
-            await newHandle.Task;
+            await newHandle.ToUniTask();
 
             if (newHandle.Status == AsyncOperationStatus.Succeeded)
                 return (true, newHandle.Result as VfxPack);
@@ -376,12 +375,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return (false, null);
         }
         
-        public async Task<(bool, T)> TryLoadAssetPackContentAsync<T>(long packId, Action<string, LogType> messageCallback) where T : UnityEngine.Object
+        public async UniTask<(bool, T)> TryLoadAssetPackContentAsync<T>(long packId, Action<string, LogType> messageCallback) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as T);
-                await handle.Task;
+                await handle.ToUniTask();
 
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as T);
                 messageCallback.Invoke($"Failed to load AssetPack with ID: {packId}", LogType.Error);
@@ -398,7 +397,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             var newHandle = assetPack.Reference.LoadAssetAsync<T>();
             _assetPackHandles.Add(packId, newHandle);
-            await newHandle.Task;
+            await newHandle.ToUniTask();
 
             if (newHandle.Status == AsyncOperationStatus.Succeeded)
             {
@@ -416,12 +415,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return _assetPacks.TryGetValue(packId, out resultPack);
         }  
         
-        public async Task<(bool isLoaded, T asset)> TryLoadAssetPackContentAsync<T>(long packId) where T : UnityEngine.Object
+        public async UniTask<(bool isLoaded, T asset)> TryLoadAssetPackContentAsync<T>(long packId) where T : UnityEngine.Object
         {
             if (_assetPackHandles.TryGetValue(packId, out var handle))
             {
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as T);
-                await handle.Task;
+                await handle.ToUniTask();
 
                 if (handle.Status == AsyncOperationStatus.Succeeded) return (true, handle.Result as T);
 
@@ -439,7 +438,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             var newHandle = assetPack.Reference.LoadAssetAsync<T>();
             _assetPackHandles.Add(packId, newHandle);
-            await newHandle.Task;
+            await newHandle.ToUniTask();
 
             if (newHandle.Status == AsyncOperationStatus.Succeeded)
                 return (true, newHandle.Result as T);
@@ -482,12 +481,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _assetPacks.Clear();
             _typePacks.Clear();
             _assetPackHandles.Clear();
-            //_uiPanelsDict.Clear();
             _loadedHandles.Clear();
             IsLoaded = false;
         }
         
-        public async Task InitializeAsync()
+        public async UniTask InitializeAsync()
         {
             Instance = this;
             OnBeforeInitialize();
