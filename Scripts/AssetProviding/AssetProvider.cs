@@ -28,7 +28,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         protected Dictionary<long, List<IAssetReferencePack>> _typePacks = new();
         protected Dictionary<long, AsyncOperationHandle> _assetPackHandles = new();
         protected Dictionary<AssetReference, AsyncOperationHandle> _loadedHandles = new();
-        protected Dictionary<AssetReference, AsyncOperationHandle<GameObject>> _loadedPanelHandles = new();
         public List<GroupReferencePack> Groups => groups;
         public bool IsLoaded { get; private set; }
         

@@ -1,25 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using Exerussus._1Extensions.Abstractions;
 using Exerussus._1Extensions.Async;
 using Exerussus._1Extensions.SmallFeatures;
 using Exerussus._1Extensions.ThreadGateFeature;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.Ui
 {
-    public abstract class OrganizerUI<TModule> : MonoBehaviour
+    public abstract class OrganizerUI<TModule> : MonoBehaviour, IInitializableAsync
     where TModule : UiModule, new()
     {
-        [SerializeField] protected bool autoStart;
-        [SerializeField] protected bool dontDestroyOnLoad;
-        [SerializeField] protected GameShare shareData;
-        [SerializeField] protected List<TModule> modules = new();
-        [SerializeField] protected List<string> enabledModules = new();
-        [SerializeField] protected List<string> disabledModules = new();
-        [SerializeField] protected Transform _parentTransform;
+        [SerializeField, FoldoutGroup("Settings")] protected bool autoStart;
+        [SerializeField, FoldoutGroup("Settings")] protected bool dontDestroyOnLoad;
+        [SerializeField, FoldoutGroup("Settings")] protected Transform _parentTransform;
+        
+        [SerializeField, FoldoutGroup("DEBUG")] protected GameShare shareData;
+        [SerializeField, FoldoutGroup("DEBUG")] protected List<TModule> modules = new();
+
+#if UNITY_EDITOR
+        [SerializeField, FoldoutGroup("DEBUG")] protected List<string> enabledModules = new();
+        [SerializeField, FoldoutGroup("DEBUG")] protected List<string> disabledModules = new();
+#endif
+        
         
         private readonly HashSet<long> _enabledModules = new();
         private readonly HashSet<long> _disabledModules = new();
@@ -44,7 +51,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             if (autoStart) _ = Initialize();
         }
 
-        public async Task Initialize()
+        public async UniTask Initialize()
         {
             if (dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
             shareData = GetGameShare();
@@ -77,8 +84,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
             foreach (var uiModule in modules) uiModule.Inject(shareData);
             
-            var jobPreInitializeHandle = ThreadGate.CreateJob(PreInitialize).Run();
-            await jobPreInitializeHandle.AsTask();
+            await ThreadGate.CreateJob(PreInitialize).Run().AsUniTask();
             
             foreach (var uiModule in modules)
             {
@@ -88,14 +94,15 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
                 else _groupsDict.Add(uiModule.Group, new List<TModule> { uiModule });
             }
 
-            var jobOnInitializeHandle = ThreadGate.CreateJob(OnInitialize).Run();
-            await jobOnInitializeHandle.AsTask();
+            await ThreadGate.CreateJob(OnInitialize).Run().AsUniTask();
             
             foreach (var uiModule in modules)
             {
-                if (_enabledModules.Contains(uiModule.ConvertId())) _ =  uiModule.ShowAsync(shareData, _parentTransform);
+                if (_enabledModules.Contains(uiModule.ConvertId())) _ = uiModule.ShowAsync(shareData, _parentTransform);
                 else _disabledModules.Add(uiModule.ConvertId());
             }
+            
+            await ThreadGate.CreateJob(OnPostInitialize).Run().AsUniTask();
         }
 
         protected virtual void OnPanelUiPackApply(UiModule.UiModuleHandle moduleHandle, IAssetReferencePack pack, PanelUiMetaInfo metaInfo)
@@ -126,10 +133,12 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 _disabledModules.Remove(moduleId);
                 _enabledModules.Add(moduleId);
+                #if UNITY_EDITOR
                 enabledModules.Clear();
                 disabledModules.Clear();
                 foreach (var id in _enabledModules) enabledModules.Add(id.ToStringFromStableId());
                 foreach (var id in _disabledModules) disabledModules.Add(id.ToStringFromStableId());
+                #endif
             }
         }
 
@@ -139,10 +148,12 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             {
                 _enabledModules.Remove(moduleId);
                 _disabledModules.Add(moduleId);
+                #if UNITY_EDITOR
                 enabledModules.Clear();
                 disabledModules.Clear();
                 foreach (var id in _enabledModules) enabledModules.Add(id.ToStringFromStableId());
                 foreach (var id in _disabledModules) disabledModules.Add(id.ToStringFromStableId());
+                #endif
             }
         }
 
@@ -191,7 +202,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
-        public async Task ShowModuleAsync(long moduleId)
+        public async UniTask ShowModuleAsync(long moduleId)
         {
             if (_modulesDict.TryGetValue(moduleId, out var uiModule))
             {
@@ -298,6 +309,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         protected virtual void PreInitialize() {}
         protected virtual void OnInitialize() {}
+        protected virtual void OnPostInitialize() {}
         protected abstract void SetShareData(GameShare shareData);
 
     }
