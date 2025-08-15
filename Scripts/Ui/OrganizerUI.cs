@@ -63,7 +63,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             shareData.AddSharedObject(new OrganizerActions{ Sorting = Sort});
 
-            await TaskUtils.WaitUntilAsync(() => AssetProvider.IsLoaded);
+            await TaskUtils.WaitUntilCondition(() => AssetProvider.IsLoaded);
 
             var allPacks = AssetProvider.GetPacksByType(AssetConstants.UiPanelId);
             if (allPacks.Count > 0)
