@@ -5,7 +5,7 @@
   "description": "Плагин для управлением UI модулями с использованием Addressables.",
   "unity": "2020.3",
   "dependencies": {
-    "com.unity.addressables": "1.21.21"
+    "com.unity.addressables": "1.21.22"
   },
   "keywords": [
     "1organizer-ui",
