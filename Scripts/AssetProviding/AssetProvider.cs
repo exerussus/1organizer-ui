@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Exerussus._1Extensions.Scripts.Extensions;
+using Exerussus._1Extensions.SmallFeatures;
 using Sirenix.OdinInspector;
 using Source.Scripts.Global.Managers.AssetManagement;
 using UnityEngine;
@@ -442,7 +443,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             if (newHandle.Status == AsyncOperationStatus.Succeeded)
                 return (true, newHandle.Result as T);
 
-            Debug.LogError($"Failed to load AssetPack with ID: {packId}");
+            Debug.LogError($"Ошибка при загрузке AssetPack : {packId.ToStringFromStableId()}");
             _assetPackHandles.Remove(packId);
             return (false, null);
         }
@@ -451,7 +452,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             if (!_assetPackHandles.TryPop(packId, out var handle))
             {
-                Debug.LogWarning($"Attempted to unload AssetPack with ID {packId}, but it was not loaded.");
+                Debug.LogWarning($"Попытка выгрузить AssetPack {packId.ToStringFromStableId()}, который не был загружен.");
                 return;
             }
 

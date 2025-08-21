@@ -30,9 +30,17 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private Dictionary<long, GameObjectLoader> _gameObjectsDict = new();
         private HashSet<SpriteRenderer> _spriteRenderers = new();
         private HashSet<Image> _imageRenderers = new();
+        private Dictionary<long, Sprite> _defaultSpritesForGroups = new();
 
+        private Sprite _defaultSprite;
+        
         public AssetProvider AssetProvider => _assetProvider;
 
+        public void SetDefaultSprite(Sprite sprite)
+        {
+            _defaultSprite = sprite;
+        }
+        
         #region Universal Loading
 
         public async UniTask<T> LoadAsset<T>(long id) where T : Object
@@ -72,7 +80,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 pack = new SpriteLoader
                 {
                     id = id,
-                    loadedSprite = assetPack
+                    loadedSprite = assetPack ?? _defaultSprite
 #if UNITY_EDITOR
                     , name = id.ToStringFromStableId()
 #endif
@@ -92,13 +100,13 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
                 var result = await _assetProvider.TryLoadAssetPackContentAsync<Sprite>(id);
-
+                
                 if (!result.isLoaded) return result;
                 
                 pack = new SpriteLoader
                 {
                     id = id,
-                    loadedSprite = result.asset
+                    loadedSprite = result.asset ?? _defaultSprite
 #if UNITY_EDITOR
                     , name = id.ToStringFromStableId()
 #endif
@@ -110,7 +118,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 #endif
             }
             
-            return (true, pack.loadedSprite);
+            return (pack.loadedSprite != _defaultSprite, pack.loadedSprite);
         }
 
         #endregion
@@ -150,13 +158,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
                 var result = await _assetProvider.TryLoadAssetPackContentAsync<Sprite>(id);
-
-                if (!result.isLoaded) return false;
                 
                 pack = new SpriteLoader
                 {
                     id = id,
-                    loadedSprite = result.asset
+                    loadedSprite = result.asset ?? _defaultSprite
 #if UNITY_EDITOR
                     , name = id.ToStringFromStableId()
 #endif
@@ -170,7 +176,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             _imageRenderers.Add(image);
             image.sprite = pack.loadedSprite;
-            return true;
+            return image.sprite != _defaultSprite;
         }
         
         public async UniTask<bool> LoadToSpriteRenderer(long id, SpriteRenderer spriteRenderer)
@@ -178,13 +184,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
                 var result = await _assetProvider.TryLoadAssetPackContentAsync<Sprite>(id);
-
-                if (!result.isLoaded) return false;
                 
                 pack = new SpriteLoader
                 {
                     id = id,
-                    loadedSprite = result.asset
+                    loadedSprite = result.asset ?? _defaultSprite
 #if UNITY_EDITOR
                     , name = id.ToStringFromStableId()
 #endif
@@ -198,7 +202,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             
             _spriteRenderers.Add(spriteRenderer);
             spriteRenderer.sprite = pack.loadedSprite;
-            return true;
+            return spriteRenderer.sprite != _defaultSprite;
         }
 
         #endregion
