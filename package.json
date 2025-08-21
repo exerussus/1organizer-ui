@@ -1,11 +1,11 @@
 {
   "name": "com.exerussus.1organizer-ui",
-  "version": "1.0.98",
+  "version": "1.0.99",
   "displayName": "1Organizer UI",
   "description": "Плагин для управлением UI модулями с использованием Addressables.",
   "unity": "2020.3",
   "dependencies": {
-    "com.unity.addressables": "1.21.22"
+    "com.unity.addressables": "1.21.21"
   },
   "keywords": [
     "1organizer-ui",
