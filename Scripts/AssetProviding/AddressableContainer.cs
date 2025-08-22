@@ -22,6 +22,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         [SerializeField, Sirenix.OdinInspector.FoldoutGroup("DEBUG")] private List<AddressableLoader> assetLoaders = new();
         [SerializeField, Sirenix.OdinInspector.FoldoutGroup("DEBUG")] private List<GameObjectLoader> gameObjectLoaders = new();
         [SerializeField, Sirenix.OdinInspector.FoldoutGroup("DEBUG")] private List<SpriteLoader> spriteLoaders = new();
+        [SerializeField, Sirenix.OdinInspector.FoldoutGroup("DEBUG")] private List<VfxPackLoader> vfxPackLoaders = new();
 #endif
 
         private readonly AssetProvider _assetProvider;
@@ -30,8 +31,10 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private Dictionary<long, GameObjectLoader> _gameObjectsDict = new();
         private HashSet<SpriteRenderer> _spriteRenderers = new();
         private HashSet<Image> _imageRenderers = new();
+        private Dictionary<long, VfxPackLoader> _vfxPacksDict = new();
 
         private Sprite _defaultSprite;
+        private VfxPack _defaultVfxPack;
         
         public AssetProvider AssetProvider => _assetProvider;
 
@@ -230,6 +233,34 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #endregion
         
+        #region VFX Loading
+
+        public async UniTask<VfxPack> LoadVfxPackAsync(long id)
+        {       
+            if (!_vfxPacksDict.TryGetValue(id, out var pack))
+            {
+                var (result, vfxPack) = await _assetProvider.TryLoadVfxPackAsync(id);
+                
+                pack = new VfxPackLoader
+                {
+                    id = id,
+                    loadedVfxPack = result ? vfxPack : _defaultVfxPack
+#if UNITY_EDITOR
+                    , name = id.ToStringFromStableId()
+#endif
+                };
+                
+                _vfxPacksDict[id] = pack;
+#if UNITY_EDITOR
+                vfxPackLoaders.Add(pack);
+#endif
+            }
+            
+            return pack.loadedVfxPack;
+        }
+
+        #endregion
+        
         #region Unloading
 
         public void Unload()
@@ -240,29 +271,21 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _spriteRenderers.Clear();
             _imageRenderers.Clear();
             
-            foreach (var loader in _loadersDict.Values)
-            {
-                _assetProvider.UnloadAssetPack(loader.id);
-            }
-            
-            foreach (var loader in _spritesDict.Values)
-            {
-                _assetProvider.UnloadAssetPack(loader.id);
-            }
-            
-            foreach (var loader in _gameObjectsDict.Values)
-            {
-                _assetProvider.UnloadAssetPack(loader.id);
-            }
+            foreach (var loader in _loadersDict.Values) _assetProvider.UnloadAssetPack(loader.id);
+            foreach (var loader in _spritesDict.Values) _assetProvider.UnloadAssetPack(loader.id);
+            foreach (var loader in _gameObjectsDict.Values) _assetProvider.UnloadAssetPack(loader.id);
+            foreach (var loader in _vfxPacksDict.Values) _assetProvider.UnloadAssetPack(loader.id);
             
             _loadersDict.Clear();
             _spritesDict.Clear();
             _gameObjectsDict.Clear();
+            _vfxPacksDict.Clear();
 
 #if UNITY_EDITOR
             assetLoaders.Clear();
             spriteLoaders.Clear();
             gameObjectLoaders.Clear();
+            vfxPackLoaders.Clear();
 #endif
 
             OnUnload();
@@ -308,6 +331,18 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 #endif
             public long id;
             public Sprite loadedSprite;
+        }
+
+#if UNITY_EDITOR
+        [Serializable]
+#endif
+        public class VfxPackLoader
+        {
+#if UNITY_EDITOR
+            public string name;
+#endif
+            public long id;
+            public VfxPack loadedVfxPack;
         }
 
         #endregion
