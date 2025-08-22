@@ -30,7 +30,6 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         private Dictionary<long, GameObjectLoader> _gameObjectsDict = new();
         private HashSet<SpriteRenderer> _spriteRenderers = new();
         private HashSet<Image> _imageRenderers = new();
-        private Dictionary<long, Sprite> _defaultSpritesForGroups = new();
 
         private Sprite _defaultSprite;
         
@@ -43,7 +42,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         #region Universal Loading
 
-        public async UniTask<T> LoadAsset<T>(long id) where T : Object
+        public async UniTask<T> LoadAssetAsync<T>(long id) where T : Object
         {
             if (!_loadersDict.TryGetValue(id, out var pack))
             {
@@ -71,7 +70,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #region Sprite Loading
 
-        public async UniTask<Sprite> LoadSprite(long id)
+        public async UniTask<Sprite> LoadSpriteAsync(long id)
         {
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
@@ -95,7 +94,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return pack.loadedSprite;
         }
         
-        public async UniTask<(bool isLoaded, Sprite sprite)> TryLoadSprite(long id)
+        public async UniTask<(bool isLoaded, Sprite sprite)> TryLoadSpriteAsync(long id)
         {
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
@@ -125,7 +124,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #region GameObject Loading
 
-        public async UniTask<GameObject> LoadGameObject(long id)
+        public async UniTask<GameObject> LoadGameObjectAsync(long id)
         {
             if (!_gameObjectsDict.TryGetValue(id, out var pack))
             {
@@ -153,7 +152,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #region To Renderer Loading 
 
-        public async UniTask<bool> LoadToImage(long id, Image image)
+        public async UniTask<bool> LoadToImageAsync(long id, Image image)
         {
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
@@ -179,7 +178,19 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return image.sprite != _defaultSprite;
         }
         
-        public async UniTask<bool> LoadToSpriteRenderer(long id, SpriteRenderer spriteRenderer)
+        public void LoadToImage(long id, Image image)
+        {
+            if (!_spritesDict.TryGetValue(id, out var pack))
+            {
+                LoadToImageAsync(id, image).Forget();
+                return;
+            }
+            
+            _imageRenderers.Add(image);
+            image.sprite = pack.loadedSprite;
+        }
+        
+        public async UniTask<bool> LoadToSpriteRendererAsync(long id, SpriteRenderer spriteRenderer)
         {            
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
@@ -203,6 +214,18 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _spriteRenderers.Add(spriteRenderer);
             spriteRenderer.sprite = pack.loadedSprite;
             return spriteRenderer.sprite != _defaultSprite;
+        }
+        
+        public void LoadToSpriteRenderer(long id, SpriteRenderer spriteRenderer)
+        {            
+            if (!_spritesDict.TryGetValue(id, out var pack))
+            {
+                LoadToSpriteRendererAsync(id, spriteRenderer).Forget();
+                return;
+            }
+            
+            _spriteRenderers.Add(spriteRenderer);
+            spriteRenderer.sprite = pack.loadedSprite;
         }
 
         #endregion
