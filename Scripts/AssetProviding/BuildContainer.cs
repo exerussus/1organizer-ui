@@ -8,12 +8,12 @@ using Object = UnityEngine.Object;
 namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 {
     [CreateAssetMenu(fileName = "BuildContainer", menuName = "Exerussus/AssetProviding/BuildContainer")]
-    public class BuildContainer : ScriptableObject, IBuildContainer
+    public class DefaultBuildContainer : BuildContainer
     {
         [SerializeField, FoldoutGroup("PACKS")] private List<Pack> packs;
         [SerializeField, FoldoutGroup("SETTINGS")] private List<string> assetTypes = new();
         
-        public (long id, Object asset)[] GetAssets()
+        public override (long id, Object asset)[] GetAssets()
         {
             if (packs == null || packs.Count == 0) return null;
             
@@ -28,10 +28,5 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             public string id;
             public Object asset;
         }
-    }
-    
-    public interface IBuildContainer
-    {
-        public (long id, Object asset)[] GetAssets();
     }
 }
