@@ -26,11 +26,11 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 #endif
 
         private readonly AssetProvider _assetProvider;
+        private HashSet<SpriteRenderer> _spriteRenderers = new();
+        private HashSet<Image> _imageRenderers = new();
         private Dictionary<long, AddressableLoader> _loadersDict = new();
         private Dictionary<long, SpriteLoader> _spritesDict = new();
         private Dictionary<long, GameObjectLoader> _gameObjectsDict = new();
-        private HashSet<SpriteRenderer> _spriteRenderers = new();
-        private HashSet<Image> _imageRenderers = new();
         private Dictionary<long, VfxPackLoader> _vfxPacksDict = new();
 
         private Sprite _defaultSprite;
@@ -42,6 +42,74 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         {
             _defaultSprite = sprite;
         }
+        
+        public virtual void Fill(IBuildContainer container)
+        {
+            foreach (var (id, asset) in container.GetAssets())
+            {
+                if (asset is Sprite sprite && !_spritesDict.ContainsKey(id)) CreateSpriteLoader(id, sprite);
+                else if (asset is GameObject gameObject && !_gameObjectsDict.ContainsKey(id)) CreateGameObject(id, gameObject);
+                else if (asset is VfxPack vfxPack && !_vfxPacksDict.ContainsKey(id)) CreateVfxPackLoader(id, vfxPack);
+            }
+        }
+
+        #region Creating Loaders
+
+        protected SpriteLoader CreateSpriteLoader(long id, Sprite sprite)
+        {
+            var spriteLoader = new SpriteLoader
+            {
+                id = id,
+                loadedSprite = sprite
+#if UNITY_EDITOR
+                , name = id.ToStringFromStableId()
+#endif
+            };
+                    
+            _spritesDict[id] = spriteLoader;
+#if UNITY_EDITOR
+            spriteLoaders.Add(spriteLoader);
+#endif
+            return spriteLoader;
+        }
+
+        protected GameObjectLoader CreateGameObject(long id, GameObject gameObject)
+        {
+            var loader = new GameObjectLoader
+            {
+                id = id,
+                loadedObject = gameObject
+#if UNITY_EDITOR
+                , name = id.ToStringFromStableId()
+#endif
+            };
+                
+            _gameObjectsDict[id] = loader;
+#if UNITY_EDITOR
+            gameObjectLoaders.Add(loader);
+#endif
+            return loader;
+        }
+
+        protected VfxPackLoader CreateVfxPackLoader(long id, VfxPack vfxPack)
+        {
+            var loader = new VfxPackLoader
+            {
+                id = id,
+                loadedVfxPack = vfxPack
+#if UNITY_EDITOR
+                , name = id.ToStringFromStableId()
+#endif
+            };
+                
+            _vfxPacksDict[id] = loader;
+#if UNITY_EDITOR
+            vfxPackLoaders.Add(loader);
+#endif
+            return loader;
+        }
+
+        #endregion
         
         #region Universal Loading
 
@@ -79,19 +147,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             {
                 var assetPack = await _assetProvider.LoadAssetPackAsync<Sprite>(id);
                 
-                pack = new SpriteLoader
-                {
-                    id = id,
-                    loadedSprite = assetPack ?? _defaultSprite
-#if UNITY_EDITOR
-                    , name = id.ToStringFromStableId()
-#endif
-                };
-                
-                _spritesDict[id] = pack;
-#if UNITY_EDITOR
-                spriteLoaders.Add(pack);
-#endif
+                pack = CreateSpriteLoader(id, assetPack ?? _defaultSprite);
             }
             
             return pack.loadedSprite;
@@ -105,19 +161,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
                 
                 if (!result.isLoaded) return result;
                 
-                pack = new SpriteLoader
-                {
-                    id = id,
-                    loadedSprite = result.asset ?? _defaultSprite
-#if UNITY_EDITOR
-                    , name = id.ToStringFromStableId()
-#endif
-                };
-                
-                _spritesDict[id] = pack;
-#if UNITY_EDITOR
-                spriteLoaders.Add(pack);
-#endif
+                pack = CreateSpriteLoader(id, result.asset ?? _defaultSprite);
             }
             
             return (pack.loadedSprite != _defaultSprite, pack.loadedSprite);
@@ -132,20 +176,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             if (!_gameObjectsDict.TryGetValue(id, out var pack))
             {
                 var assetPack = await _assetProvider.LoadAssetPackAsync<GameObject>(id);
-                
-                pack = new GameObjectLoader
-                {
-                    id = id,
-                    loadedObject = assetPack
-#if UNITY_EDITOR
-                    , name = id.ToStringFromStableId()
-#endif
-                };
-                
-                _gameObjectsDict[id] = pack;
-#if UNITY_EDITOR
-                gameObjectLoaders.Add(pack);
-#endif
+                pack = CreateGameObject(id, assetPack);
             }
             
             return pack.loadedObject;
@@ -153,7 +184,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #endregion
 
-        #region To Renderer Loading 
+        #region To Renderer Loading
 
         public async UniTask<bool> LoadToImageAsync(long id, Image image)
         {
@@ -161,19 +192,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             {
                 var result = await _assetProvider.TryLoadAssetPackContentAsync<Sprite>(id);
                 
-                pack = new SpriteLoader
-                {
-                    id = id,
-                    loadedSprite = result.asset ?? _defaultSprite
-#if UNITY_EDITOR
-                    , name = id.ToStringFromStableId()
-#endif
-                };
-                
-                _spritesDict[id] = pack;
-#if UNITY_EDITOR
-                spriteLoaders.Add(pack);
-#endif
+                pack = CreateSpriteLoader(id, result.asset ?? _defaultSprite);
             }
             
             _imageRenderers.Add(image);
@@ -198,20 +217,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             if (!_spritesDict.TryGetValue(id, out var pack))
             {
                 var result = await _assetProvider.TryLoadAssetPackContentAsync<Sprite>(id);
-                
-                pack = new SpriteLoader
-                {
-                    id = id,
-                    loadedSprite = result.asset ?? _defaultSprite
-#if UNITY_EDITOR
-                    , name = id.ToStringFromStableId()
-#endif
-                };
-                
-                _spritesDict[id] = pack;
-#if UNITY_EDITOR
-                spriteLoaders.Add(pack);
-#endif
+                pack = CreateSpriteLoader(id, result.asset ?? _defaultSprite);
             }
             
             _spriteRenderers.Add(spriteRenderer);
@@ -240,20 +246,8 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             if (!_vfxPacksDict.TryGetValue(id, out var pack))
             {
                 var (result, vfxPack) = await _assetProvider.TryLoadVfxPackAsync(id);
-                
-                pack = new VfxPackLoader
-                {
-                    id = id,
-                    loadedVfxPack = result ? vfxPack : _defaultVfxPack
-#if UNITY_EDITOR
-                    , name = id.ToStringFromStableId()
-#endif
-                };
-                
-                _vfxPacksDict[id] = pack;
-#if UNITY_EDITOR
-                vfxPackLoaders.Add(pack);
-#endif
+
+                pack = CreateVfxPackLoader(id, vfxPack ?? _defaultVfxPack);
             }
             
             return pack.loadedVfxPack;
