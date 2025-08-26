@@ -10,9 +10,16 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
     [CreateAssetMenu(fileName = "BuildContainer", menuName = "Exerussus/AssetProviding/BuildContainer")]
     public class DefaultBuildContainer : BuildContainer
     {
-        [SerializeField, FoldoutGroup("PACKS")] private List<Pack> packs;
-        [SerializeField, FoldoutGroup("SETTINGS")] private List<string> assetTypes = new();
-        
+        [SerializeField, FoldoutGroup("PACKS")] private List<Pack> packs = new();
+
+        internal override void AddNew(string id, Object asset)
+        {
+            packs.Add(new Pack {id = id, asset = asset});
+            #if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+            #endif
+        }
+
         public override (long id, Object asset)[] GetAssets()
         {
             if (packs == null || packs.Count == 0) return null;
