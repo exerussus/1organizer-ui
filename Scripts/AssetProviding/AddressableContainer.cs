@@ -55,12 +55,13 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 
         #region Creating Loaders
 
-        protected SpriteLoader CreateSpriteLoader(long id, Sprite sprite)
+        protected SpriteLoader CreateSpriteLoader(long id, Sprite sprite, bool isAsyncLoaded = false)
         {
             var spriteLoader = new SpriteLoader
             {
                 id = id,
-                loadedSprite = sprite
+                loadedSprite = sprite,
+                isAsyncLoaded = isAsyncLoaded
 #if UNITY_EDITOR
                 , name = id.ToStringFromStableId()
 #endif
@@ -73,12 +74,13 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return spriteLoader;
         }
 
-        protected GameObjectLoader CreateGameObject(long id, GameObject gameObject)
+        protected GameObjectLoader CreateGameObject(long id, GameObject gameObject, bool isAsyncLoaded = false)
         {
             var loader = new GameObjectLoader
             {
                 id = id,
-                loadedObject = gameObject
+                loadedObject = gameObject,
+                isAsyncLoaded = isAsyncLoaded
 #if UNITY_EDITOR
                 , name = id.ToStringFromStableId()
 #endif
@@ -91,12 +93,13 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             return loader;
         }
 
-        protected VfxPackLoader CreateVfxPackLoader(long id, VfxPack vfxPack)
+        protected VfxPackLoader CreateVfxPackLoader(long id, VfxPack vfxPack, bool isAsyncLoaded = false)
         {
             var loader = new VfxPackLoader
             {
                 id = id,
-                loadedVfxPack = vfxPack
+                loadedVfxPack = vfxPack,
+                isAsyncLoaded = isAsyncLoaded
 #if UNITY_EDITOR
                 , name = id.ToStringFromStableId()
 #endif
@@ -241,6 +244,18 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         #region VFX Loading
 
+        public bool TryLoadVfxPack(long id, out VfxPack vfxPack)
+        {
+            if (_vfxPacksDict.TryGetValue(id, out var pack))
+            {
+                vfxPack = pack.loadedVfxPack;
+                return true;
+            }
+            
+            vfxPack = null;
+            return false;
+        }
+
         public async UniTask<VfxPack> LoadVfxPackAsync(long id)
         {       
             if (!_vfxPacksDict.TryGetValue(id, out var pack))
@@ -266,9 +281,9 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             _imageRenderers.Clear();
             
             foreach (var loader in _loadersDict.Values) _assetProvider.UnloadAssetPack(loader.id);
-            foreach (var loader in _spritesDict.Values) _assetProvider.UnloadAssetPack(loader.id);
-            foreach (var loader in _gameObjectsDict.Values) _assetProvider.UnloadAssetPack(loader.id);
-            foreach (var loader in _vfxPacksDict.Values) _assetProvider.UnloadAssetPack(loader.id);
+            foreach (var loader in _spritesDict.Values) if (loader.isAsyncLoaded) _assetProvider.UnloadAssetPack(loader.id);
+            foreach (var loader in _gameObjectsDict.Values) if (loader.isAsyncLoaded) _assetProvider.UnloadAssetPack(loader.id);
+            foreach (var loader in _vfxPacksDict.Values) if (loader.isAsyncLoaded) _assetProvider.UnloadAssetPack(loader.id);
             
             _loadersDict.Clear();
             _spritesDict.Clear();
@@ -313,6 +328,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 #endif
             public long id;
             public GameObject loadedObject;
+            public bool isAsyncLoaded;
         }
 
 #if UNITY_EDITOR
@@ -325,6 +341,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 #endif
             public long id;
             public Sprite loadedSprite;
+            public bool isAsyncLoaded;
         }
 
 #if UNITY_EDITOR
@@ -337,6 +354,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
 #endif
             public long id;
             public VfxPack loadedVfxPack;
+            public bool isAsyncLoaded;
         }
 
         #endregion
