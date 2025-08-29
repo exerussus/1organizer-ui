@@ -244,6 +244,28 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         #region VFX Loading
 
+        public async UniTask PreLoadVfxPackAsync(long id, long defaultId)
+        {
+            if (id == 0) return;
+            
+            if (TryGetVfxPack(id, out _)) return;
+            var (result, pack) = await _assetProvider.TryLoadVfxPackAsync(id);
+
+            if (result)
+            {
+                CreateVfxPackLoader(id, pack, true);
+            }
+            else
+            {
+                if (!_vfxPacksDict.ContainsKey(defaultId))
+                {
+                    Debug.LogError($"Vfx pack with id : {id.ToStringFromStableId()} ({id}) cannot be loaded, default vfx pack with id : {defaultId.ToStringFromStableId()} ({defaultId}) cannot be found");
+                    return;
+                }
+                _vfxPacksDict[id] = _vfxPacksDict[defaultId];
+            }
+        }
+        
         public bool TryGetVfxPack(long id, out VfxPack vfxPack)
         {
             if (_vfxPacksDict.TryGetValue(id, out var pack))
