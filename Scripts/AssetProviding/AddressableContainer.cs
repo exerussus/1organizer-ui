@@ -244,7 +244,7 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
         
         #region VFX Loading
 
-        public bool TryLoadVfxPack(long id, out VfxPack vfxPack)
+        public bool TryGetVfxPack(long id, out VfxPack vfxPack)
         {
             if (_vfxPacksDict.TryGetValue(id, out var pack))
             {
@@ -266,6 +266,20 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             }
             
             return pack.loadedVfxPack;
+        }
+
+        public async UniTask<(bool, VfxPack)> TryLoadVfxPackAsync(long id)
+        {       
+            if (!_vfxPacksDict.TryGetValue(id, out var pack))
+            {
+                var (result, vfxPack) = await _assetProvider.TryLoadVfxPackAsync(id);
+                
+                if (!result) return (false, null);
+                
+                pack = CreateVfxPackLoader(id, vfxPack ?? _defaultVfxPack);
+            }
+            
+            return (true, pack.loadedVfxPack);
         }
 
         #endregion
