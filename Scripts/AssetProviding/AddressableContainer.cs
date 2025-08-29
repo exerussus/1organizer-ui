@@ -251,6 +251,12 @@ namespace Exerussus._1OrganizerUI.Scripts.AssetProviding
             if (TryGetVfxPack(id, out _)) return;
             var (result, pack) = await _assetProvider.TryLoadVfxPackAsync(id);
 
+            if (result && pack.Process is not { Length: > 0 })
+            {
+                Debug.LogError($"Vfx pack with id : {id.ToStringFromStableId()} ({id}) cannot be loaded, process is empty!");
+                result = false;
+            }
+            
             if (result)
             {
                 CreateVfxPackLoader(id, pack, true);
