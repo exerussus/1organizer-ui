@@ -1,4 +1,4 @@
-﻿using Exerussus._1Extensions.SmallFeatures;
+﻿using Exerussus.GameSharing.Runtime;
 
 namespace Exerussus._1OrganizerUI.Scripts.Ui
 {

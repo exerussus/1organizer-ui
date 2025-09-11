@@ -8,6 +8,7 @@ using Exerussus._1Extensions.SmallFeatures;
 using Exerussus._1Extensions.ThreadGateFeature;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using Sirenix.OdinInspector;
+using Exerussus.GameSharing.Runtime;
 using UnityEngine;
 
 namespace Exerussus._1OrganizerUI.Scripts.Ui
