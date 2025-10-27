@@ -49,7 +49,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         public void Start()
         {
-            if (autoStart) _ = Initialize();
+            if (autoStart) Initialize().Forget();
         }
 
         public async UniTask Initialize()
@@ -99,7 +99,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             
             foreach (var uiModule in modules)
             {
-                if (_enabledModules.Contains(uiModule.ConvertId())) _ = uiModule.ShowAsync(shareData, _parentTransform);
+                if (_enabledModules.Contains(uiModule.ConvertId())) uiModule.ShowAsync(shareData, _parentTransform).Forget();
                 else _disabledModules.Add(uiModule.ConvertId());
             }
             

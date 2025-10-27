@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Exerussus.GameSharing.Runtime;
 using Exerussus._1OrganizerUI.Scripts.AssetProviding;
 using UnityEngine;
@@ -45,7 +46,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         public virtual void Show(GameShare shareData, Transform transform)
         {
-            if (UIObject == null) _ = Load(shareData, transform);
+            if (UIObject == null) Load(shareData, transform).Forget();
 
             if (UIObject != null)
             {
@@ -62,7 +63,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         public virtual void Show(GameShare shareData, Transform transform, Action onLoad)
         {
-            if (UIObject == null) Load(shareData, transform, onLoad);
+            if (UIObject == null) Load(shareData, transform, onLoad).Forget();
 
             if (UIObject != null)
             {
@@ -79,7 +80,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
 
         public virtual void Show(GameShare shareData, Transform transform, Action<GameObject> onLoad)
         {
-            if (UIObject == null) Load(shareData, transform, onLoad);
+            if (UIObject == null) Load(shareData, transform, onLoad).Forget();
 
             if (UIObject != null)
             {
@@ -94,7 +95,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             }
         }
 
-        public virtual async Task ShowAsync(GameShare shareData, Transform transform)
+        public virtual async UniTask ShowAsync(GameShare shareData, Transform transform)
         {
             if (UIObject == null) await Load(shareData, transform);
 
@@ -116,7 +117,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             UIObject?.UpdateObject();
         }
 
-        public virtual async Task Load(GameShare shareData, Transform transform)
+        public virtual async UniTask Load(GameShare shareData, Transform transform)
         {
             if (_isLoading) return;
             _mSharedData = shareData;
@@ -137,7 +138,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _isLoading = false;
         }
 
-        public virtual async void Load(GameShare shareData, Transform transform, Action onLoad)
+        public virtual async UniTask Load(GameShare shareData, Transform transform, Action onLoad)
         {
             if (_isLoading) return;
             _mSharedData = shareData;
@@ -159,7 +160,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
            _isLoading = false;
         }
 
-        public virtual async void Load(GameShare shareData, Transform transform, Action<GameObject> onLoad)
+        public virtual async UniTask Load(GameShare shareData, Transform transform, Action<GameObject> onLoad)
         {
             if (_isLoading) return;
             _mSharedData = shareData;
