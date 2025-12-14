@@ -28,13 +28,15 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         [SerializeField, FoldoutGroup("DEBUG")] protected List<string> disabledModules = new();
 #endif
         
-        
         private readonly HashSet<long> _enabledModules = new();
         private readonly HashSet<long> _disabledModules = new();
         private Dictionary<long, TModule> _modulesDict;
         private Dictionary<string, List<TModule>> _groupsDict;
 
         public abstract IAssetProvider AssetProvider { get; }
+
+        private List<long> _enabledModulesList = new();
+        public IReadOnlyList<long> EnabledModules => _enabledModulesList;
 
         public Transform ParentTransform
         {
@@ -133,7 +135,8 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
             if (_disabledModules.Contains(moduleId))
             {
                 _disabledModules.Remove(moduleId);
-                _enabledModules.Add(moduleId);
+                if (_enabledModules.Add(moduleId)) _enabledModulesList.Add(moduleId);
+                
                 #if UNITY_EDITOR
                 enabledModules.Clear();
                 disabledModules.Clear();
@@ -147,7 +150,7 @@ namespace Exerussus._1OrganizerUI.Scripts.Ui
         {
             if (_enabledModules.Contains(moduleId))
             {
-                _enabledModules.Remove(moduleId);
+                if (_enabledModules.Remove(moduleId)) _enabledModulesList.Remove(moduleId);
                 _disabledModules.Add(moduleId);
                 #if UNITY_EDITOR
                 enabledModules.Clear();
